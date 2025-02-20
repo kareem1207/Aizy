@@ -1,0 +1,24 @@
+[
+    {
+        "id":1,
+        "name":"pen",
+        "price":10.00,
+        "currency":"INR",
+        "category":"Education",
+        "seller_name":"Aizy",
+        "count":10,
+        "rating":4.5,
+        "image":"/assets/pen.png"
+    },
+    {
+        "id":2,
+        "name":"Water Colors",
+        "price":200.00,
+        "currency":"INR",
+        "category":"Arts",
+        "seller_name":"Aizy",
+        "count":10,
+        "rating":4.5,
+        "image":"/assets/water_colors.png"
+    }
+]
