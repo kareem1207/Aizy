@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+.next/sw.js
+.next/sw.js.map
 
 # production
 /build
@@ -39,3 +41,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Service Worker
+public/sw.js
+public/sw.js.map
