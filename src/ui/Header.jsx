@@ -26,17 +26,17 @@ export const Header = () => {
                     </div>
 
                     {/* Search Bar */}
-                    <div className="hidden md:flex flex-1 max-w-[600px]">
+                    <div className=" md:flex flex-1 max-w-[600px]">
                         <SearchBar />
                     </div>
 
                     {/* Language Selector */}
-                    <div className="hidden md:flex flex-shrink-0">
+                    <div className=" md:flex flex-shrink-0">
                         <Language />
                     </div>
 
                     {/* User Profile */}
-                    <div className="hidden md:flex flex-shrink-0">
+                    <div className=" md:flex flex-shrink-0">
                         <User />
                     </div>
 

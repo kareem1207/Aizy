@@ -44,7 +44,7 @@ const SocialIcon = ({ platform }) => {
         <Link 
             href={socialData.href} 
             target="_blank"
-            className="text-gray-600 hover:text-indigo-600 transition-colors transform hover:scale-110 duration-200"
+            className="inline-flex items-center justify-center text-gray-600 hover:text-indigo-600 transition-colors transform hover:scale-110 duration-200"
             aria-label={platform}
         >
             {socialData.icon}
@@ -123,13 +123,13 @@ export const Footer = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="border-t pt-8 flex flex-col items-center gap-6">
                     <p className="text-gray-600 text-sm">
                         © {year} Your Company. All rights reserved.
                     </p>
                     
                     {/* Social Links */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center justify-center gap-8">
                         {['GitHub', 'X', 'Instagram', 'LinkedIn'].map((social) => (
                             <SocialIcon key={social} platform={social} />
                         ))}
