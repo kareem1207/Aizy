@@ -21,7 +21,7 @@ export const Header = () => {
                     </a>
 
                     {/* Location */}
-                    <div className="hidden md:flex flex-shrink-0">
+                    <div className=" md:flex flex-shrink-0">
                         <Location />
                     </div>
 
