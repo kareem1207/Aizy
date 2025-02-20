@@ -4,11 +4,11 @@
         "name":"pen",
         "price":10.00,
         "currency":"INR",
-        "category":"Education",
+        "category":"Stationery",
         "seller_name":"Aizy",
         "count":10,
         "rating":4.5,
-        "image":"/assets/pen.png"
+        "image":"/assets/Aizy/pen.png"
     },
     {
         "id":2,
@@ -19,6 +19,116 @@
         "seller_name":"Aizy",
         "count":10,
         "rating":4.5,
-        "image":"/assets/water_colors.png"
+        "image":"/assets/Aizy/water_colors.png"
+    },
+    {
+        "id":3,
+        "name":"Sketchbook",
+        "price":150.00,
+        "currency":"INR",
+        "category":"Arts",
+        "seller_name":"Aizy",
+        "count":5,
+        "rating":4.7,
+        "image":"/assets/Aizy/sketchbook.png"
+    },
+    {
+        "id":4,
+        "name":"Asus Laptop vivobook",
+        "price":90000.00,
+        "currency":"INR",
+        "category":"Electronics",
+        "seller_name":"Aizy",
+        "count":5,
+        "rating":4.7,
+        "image":"/assets/Aizy/asus_laptop_vivobook.png"
+    },
+    {
+        "id":5,
+        "name":"Notebook",
+        "price":100.00,
+        "currency":"INR",
+        "category":"Stationery",
+        "seller_name":"Aizy",
+        "count":15,
+        "rating":4.3,
+        "image":"/assets/Aizy/notebook.png"
+    },
+    {
+        "id":6,
+        "name":"Cake",
+        "price":850.00,
+        "currency":"INR",
+        "category":"Food",
+        "seller_name":"Aizy",
+        "count":15,
+        "rating":4.3,
+        "image":"/assets/Aizy/cake.png"
+    },
+    {
+        "id":7,
+        "name":"Safari Hitech Large Size 35 Ltrs Water Resistant Standard Backpack - Black",
+        "price":969.00,
+        "currency":"INR",
+        "category":"Bags",
+        "seller_name":"Aizy",
+        "count":10,
+        "rating":4.1,
+        "image":"/assets/Aizy/backpack.png"
+    },
+    {
+        "id":8,
+        "name":"Samsung 108 cm (43 inches) D Series Brighter Crystal 4K Vivid Pro Ultra HD Smart LED TV UA43DUE77AKLXL (Black)",
+        "price":31990.00,
+        "currency":"INR",
+        "category":"Electronics",
+        "seller_name":"Aizy",
+        "count":10,
+        "rating":4.0,
+        "image":"/assets/Aizy/Samsung_tv.png"
+    },
+    {
+        "id":9,
+        "name":"Pebble Revolve Pro Rotating Bezel 1.43 Ultra Amoled Display, 600 Nits Brightness, Always on Display, High Accuracy Step Count, Metal Build, Premium Strap, BT Calling, DIY Watch Faces, Voice Assistant",
+        "price":3499.00,
+        "currency":"INR",
+        "category":"Electronics",
+        "seller_name":"Aizy",
+        "count":10,
+        "rating":4.0,
+        "image":"/assets/Aizy/pebble_revolve_pro.png"
+    },
+    {
+        "id":10,
+        "name":"Speedex Water Bottle 1 Ltr, Wine, Stainless Steel, 1 Litre Screw Cap Bottles for Girls, Boys, Adults & Kids, Gym, Sports, Fridge Use, Perfect for School & Office - Single Bottle Set, 1000 ml",
+        "price":359.00,
+        "currency":"INR",
+        "category":"Beverages",
+        "seller_name":"Aizy",
+        "count":10,
+        "rating":4.0,
+        "image":"/assets/Aizy/speedex_water_bottle.png"
+    },
+    {
+        "id":11,
+        "name":"Mivi SuperPods Halo [Flagship Launch], True Wireless Earbuds with 35dB ANC, 3D Soundstage, 60H Playtime, Spatial Audio, Transparency Mode, 13mm Drivers, and IPX4 Water Resistance",
+        "price":1999.00,
+        "currency":"INR",
+        "category":"Electronics",
+        "seller_name":"Aizy",
+        "count":20,
+        "rating":4.1,
+        "image":"/assets/Aizy/mivi.png"
+    },
+    {
+        "id":12,
+        "name":"realme 14 Pro 5G (Pearl White, 8GB RAM, 256GB",
+        "price":24840.00,
+        "currency":"INR",
+        "category":"Electronics",
+        "seller_name":"Aizy",
+        "count":20,
+        "rating":4.8,
+        "image":"/assets/Aizy/realme_14_pro.png"
     }
 ]
