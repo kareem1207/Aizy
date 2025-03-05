@@ -1,9 +1,11 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
+import { useUserStore } from '@/store/userStore';
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
+    const { loginUser, createUser } = useUserStore();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -11,6 +13,9 @@ const Login = () => {
         confirmPassword: '',
         userType: 'customer'
     });
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [success, setSuccess] = useState('');
     
 
     const handleChange = (e) => {
@@ -18,12 +23,41 @@ const Login = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isLogin) {
-            console.log('Login attempt:', { email: formData.email, password: formData.password, userType: formData.userType });
-        } else {
-            console.log('Signup attempt:', formData);
+        setError('');
+        setSuccess('');
+        setIsLoading(true);
+
+        try {
+            if (isLogin) {
+                const result = await loginUser(formData);
+                if (result.success) {
+                    setSuccess(result.message);
+                } else {
+                    setError(result.message);
+                }
+                console.log('Login attempt:', { email: formData.email, password: formData.password, userType: formData.userType });
+            } else {
+                if (formData.password !== formData.confirmPassword) {
+                    setError('Passwords do not match');
+                    setIsLoading(false);
+                    return;
+                }
+                
+                const result = await createUser(formData);
+                if (result.success) {
+                    setSuccess(result.message);
+                } else {
+                    setError(result.message);
+                }
+                console.log('Signup attempt:', formData);
+            }
+        } catch (err) {
+            setError('An unexpected error occurred. Please try again.');
+            console.error('Form submission error:', err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -39,18 +73,30 @@ const Login = () => {
                 
                 <div className="flex mb-6">
                     <button 
-                        onClick={() => setIsLogin(true)} 
+                        onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }} 
                         className={`flex-1 py-2 text-center ${isLogin ? 'text-[#3c6ca8] border-b-2 border-[#3c6ca8]' : 'text-[#3c6ca8]/50'}`}
                     >
                         Login
                     </button>
                     <button 
-                        onClick={() => setIsLogin(false)} 
+                        onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }} 
                         className={`flex-1 py-2 text-center ${!isLogin ? 'text-[#3c6ca8] border-b-2 border-[#3c6ca8]' : 'text-[#3c6ca8]/50'}`}
                     >
                         Sign Up
                     </button>
                 </div>
+                
+                {error && (
+                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                        {error}
+                    </div>
+                )}
+                
+                {success && (
+                    <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                        {success}
+                    </div>
+                )}
                 
                 <form onSubmit={handleSubmit}>
                     {!isLogin && (
@@ -64,6 +110,7 @@ const Login = () => {
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
                                 required={!isLogin}
+                                disabled={isLoading}
                             />
                         </div>
                     )}
@@ -78,6 +125,7 @@ const Login = () => {
                             onChange={handleChange}
                             className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
                             required
+                            disabled={isLoading}
                         />
                     </div>
                     
@@ -91,6 +139,7 @@ const Login = () => {
                             onChange={handleChange}
                             className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
                             required
+                            disabled={isLoading}
                         />
                     </div>
                     
@@ -105,11 +154,12 @@ const Login = () => {
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
                                 required={!isLogin}
+                                disabled={isLoading}
                             />
                         </div>
                     )}
                     
-                    <div className="mb-4">
+                    <div className="mb-4 relative">
                         <label htmlFor="userType" className="block text-[#3c6ca8] mb-2">User Type</label>
                         <select
                             id="userType"
@@ -118,12 +168,13 @@ const Login = () => {
                             onChange={handleChange}
                             className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6] appearance-none"
                             required
+                            disabled={isLoading}
                         >
                             <option value="customer">Customer</option>
                             <option value="admin">Admin</option>
                             <option value="seller">Seller</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#3c6ca8]">
+                        <div className="pointer-events-none absolute right-0 top-1/2 mt-2 flex items-center px-2 text-[#3c6ca8]">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
@@ -140,9 +191,10 @@ const Login = () => {
                     
                     <button
                         type="submit"
-                        className="w-full bg-[#3c6ca8] hover:bg-[#3c6ca8]/80 text-[#fffcf6] py-3 rounded-lg transition duration-200"
+                        className={`w-full bg-[#3c6ca8] hover:bg-[#3c6ca8]/80 text-[#fffcf6] py-3 rounded-lg transition duration-200 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        disabled={isLoading}
                     >
-                        {isLogin ? 'Sign In' : 'Create Account'}
+                        {isLoading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
                     </button>
                 </form>
                 
