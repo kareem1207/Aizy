@@ -1,10 +1,21 @@
+"use client";
+import { useState, useEffect } from "react";
 import { Language } from "@/components/Language";
 import { Location } from "@/components/Location";
 import { SearchBar } from "@/components/SearchBar";
 import Image from "next/image";
 import Link from "next/link";
-    
+
 export const Header = () => {
+    // Initialize with null, will be updated after component mounts
+    const [token, setToken] = useState(null);
+    
+    // Use useEffect to access sessionStorage after component mounts in browser
+    useEffect(() => {
+        // This code only runs in the browser after render
+        setToken(sessionStorage.getItem("user_login_token"));
+    }, []);
+    
     return (
         <div className="sticky top-0 z-50 bg-[#fffcf6] shadow-sm">
             <header className="container mx-auto">
@@ -21,25 +32,35 @@ export const Header = () => {
                     </Link>
 
                     {/* Location */}
-                    <div className=" md:flex flex-shrink-0">
+                    <div className="md:flex flex-shrink-0">
                         <Location />
                     </div>
 
                     {/* Search Bar */}
-                    <div className=" md:flex flex-1 max-w-[600px]">
+                    <div className="md:flex flex-1 max-w-[600px]">
                         <SearchBar />
                     </div>
 
                     {/* Language Selector */}
-                    <div className=" md:flex flex-shrink-0">
+                    <div className="md:flex flex-shrink-0">
                         <Language />
                     </div>
 
-                    <div className=" md:flex flex-shrink-0">
-                        <Link href="/login">
-                        Login 
-                        </Link>
-                    </div>
+                    {!token && (
+                        <div className="md:flex flex-shrink-0">
+                            <Link href="/login" className="text-[#3c6ca8] hover:underline font-medium">
+                                Login 
+                            </Link>
+                        </div>
+                    )}
+
+                    {token && (
+                        <div className="md:flex flex-shrink-0">
+                            <Link href="/user" className="text-[#3c6ca8] hover:underline font-medium">
+                                Account 
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Mobile Menu */}
                     <button className="md:hidden p-2 rounded-lg hover:bg-gray-100">

@@ -10,7 +10,6 @@ export const useUserStore = create((set) => ({
 
     console.log("Starting user creation attempt...");
     try {
-      // Map userType to role
       const userData = {
         name: user.name,
         email: user.email,
@@ -86,6 +85,7 @@ export const useUserStore = create((set) => ({
       const loginData = {
         email: user.email,
         password: user.password,
+        role: user.userType,
       };
 
       const res = await fetch("http://localhost:5000/auth/login", {
@@ -97,7 +97,6 @@ export const useUserStore = create((set) => ({
         body: JSON.stringify(loginData),
       });
 
-      // Handle non-200 responses
       if (!res.ok) {
         const errorText = await res.text();
         try {
@@ -136,7 +135,26 @@ export const useUserStore = create((set) => ({
     }
   },
 
+  generateToken: async (user) => {
+    const response = await fetch("http://localhost:5000/auth/generate-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      set(data.token);
+      sessionStorage.setItem("user_login_token", data.token);
+    } else {
+      console.error("Failed to generate token");
+    }
+  },
+
   logoutUser: () => {
+    sessionStorage.removeItem("user_login_token");
     set({ user: null });
     return { success: true, message: "Logged out successfully" };
   },

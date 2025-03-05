@@ -2,10 +2,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/store/userStore';
+import { useRouter } from 'next/navigation'
 
 const Login = () => {
+    const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
-    const { loginUser, createUser } = useUserStore();
+    const { loginUser, createUser, generateToken } = useUserStore();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -34,6 +36,9 @@ const Login = () => {
                 const result = await loginUser(formData);
                 if (result.success) {
                     setSuccess(result.message);
+                    await generateToken(formData); 
+                    router.push('/user');
+                    // location.reload();
                 } else {
                     setError(result.message);
                 }
@@ -48,6 +53,9 @@ const Login = () => {
                 const result = await createUser(formData);
                 if (result.success) {
                     setSuccess(result.message);
+                    await generateToken(formData);
+                    location.reload();
+                    router.push('/');
                 } else {
                     setError(result.message);
                 }
@@ -171,7 +179,7 @@ const Login = () => {
                             disabled={isLoading}
                         >
                             <option value="customer">Customer</option>
-                            <option value="admin">Admin</option>
+                            { isLogin && (<option value="admin">Admin</option>)}
                             <option value="seller">Seller</option>
                         </select>
                         <div className="pointer-events-none absolute right-0 top-1/2 mt-2 flex items-center px-2 text-[#3c6ca8]">
