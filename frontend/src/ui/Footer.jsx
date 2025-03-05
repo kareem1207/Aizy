@@ -57,7 +57,7 @@ export const Footer = () => {
     const year = getCurrentYear();
     
     return (
-        <footer className="bg-white border-t">
+        <footer className="bg-[#fffcf6] border-t">
             <div className="container mx-auto px-4 py-8">
                 {/* Main Footer Content */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -114,7 +114,7 @@ export const Footer = () => {
                                     placeholder="Enter your email"
                                     className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200"
                                 />
-                                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                <button className="px-4 py-2 bg-[#3c6ca8] hover:bg-[#2c5f8c] text-white rounded-lg transition-colors">
                                     Subscribe
                                 </button>
                             </div>

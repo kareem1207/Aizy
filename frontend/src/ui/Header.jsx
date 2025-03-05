@@ -1,16 +1,16 @@
 import { Language } from "@/components/Language";
 import { Location } from "@/components/Location";
 import { SearchBar } from "@/components/SearchBar";
-import { User } from "@/components/User";
 import Image from "next/image";
+import Link from "next/link";
     
 export const Header = () => {
     return (
-        <div className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="sticky top-0 z-50 bg-[#fffcf6] shadow-sm">
             <header className="container mx-auto">
                 <div className="flex items-center h-16 px-4 gap-6">
                     {/* Logo */}
-                    <a href="/" className="flex-shrink-0">
+                    <Link href="/" className="flex-shrink-0">
                         <Image 
                             src="/logo.jpg" 
                             alt="Store Logo" 
@@ -18,7 +18,7 @@ export const Header = () => {
                             height={50} 
                             className="object-contain hover:opacity-90 transition-opacity"
                         />
-                    </a>
+                    </Link>
 
                     {/* Location */}
                     <div className=" md:flex flex-shrink-0">
@@ -35,9 +35,10 @@ export const Header = () => {
                         <Language />
                     </div>
 
-                    {/* User Profile */}
                     <div className=" md:flex flex-shrink-0">
-                        <User />
+                        <Link href="/login">
+                        Login 
+                        </Link>
                     </div>
 
                     {/* Mobile Menu */}

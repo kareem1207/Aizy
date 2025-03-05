@@ -9,7 +9,7 @@ export const SearchBar = () => {
                 />
                 <button 
                     type="submit"
-                    className="h-full px-6 bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                    className="h-full px-6 bg-[#3c6ca8] hover:bg-[#2c5f8c] text-white font-medium transition-colors flex items-center gap-2"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #fffcf6;
   --foreground: #171717;
-  --primary-blue: #1a73e8;
-  --secondary-blue: #4285f4;
+  --primary-blue: #3c6ca8;
+  --secondary-blue: #3c6ca8;
   --light-blue: #e8f0fe;
   --white: #ffffff;
 }
@@ -20,6 +20,6 @@
 
 body {
   color: var(--primary-blue);
-  background: var(--white);
+  background: var(----background);
   font-family: Arial, Helvetica, sans-serif;
 }

@@ -97,7 +97,7 @@ const Home = () => {
         animate="show"
         exit="hidden"
         variants={backgroundVariants}
-        className="min-h-screen bg-gradient-to-b from-white to-blue-50 py-16 overflow-hidden"
+        className="min-h-screen  bg-[#fffcf6] to-blue-50 py-16 overflow-hidden"
       >
         <motion.div
           variants={containerVariants}
@@ -109,7 +109,7 @@ const Home = () => {
           >
             Welcome to{" "}
             <motion.span
-              className="text-indigo-600 inline-block"
+              className="text-[] inline-block"
               whileHover={{ 
                 scale: 1.1,
                 color: "#4F46E5",

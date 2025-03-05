@@ -23,7 +23,7 @@ export const Card = ({ card }) => {
           key={index}
           variants={itemVariants}
           whileHover={{ scale: 1.03 }}
-          className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+          className="bg-[#fffcf6] rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
         >
           <div className="relative pt-[100%] bg-gray-100 overflow-hidden">
             <Image
@@ -42,7 +42,7 @@ export const Card = ({ card }) => {
             
             <div className="flex items-center justify-between">
               <motion.p 
-                className="text-2xl font-bold text-indigo-600"
+                className="text-2xl font-bold text-[#3c6ca8]"
                 whileHover={{ scale: 1.1 }}
               >
                 ₹{item.price}
@@ -59,14 +59,14 @@ export const Card = ({ card }) => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex-1 bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                className="flex-1 bg-[#3c6ca8] hover:bg-[#2c5f8c] text-white py-2 rounded-lg font-semibold transition-colors"
               >
                 Add to Cart
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2 border-2 border-gray-300 rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-colors"
+                className="p-2 border-2 border-gray-300 rounded-lg transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
