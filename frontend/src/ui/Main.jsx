@@ -3,11 +3,17 @@ import jwt from "jsonwebtoken";
 import { Seller } from './Seller';
 import { Admin } from './Admin';
 import  Customer  from './Home';
+import { useEffect, useState } from "react";
 
 export const Main = () => {
-    const token = sessionStorage.getItem("user_login_token");
-    const decoded = token ? jwt.decode(token) : {};
-    const role = decoded.role || "customer";
+    const [role, setRole] = useState("customer");
+    useEffect(() => {
+        const token = sessionStorage.getItem("user_login_token");
+        if (token) {
+            const decoded = jwt.decode(token);
+            setRole(decoded.role || "customer");
+        }
+    }, []);
 
     return <>
         {role === "customer" && <Customer />}

@@ -37,8 +37,8 @@ const Login = () => {
                 if (result.success) {
                     setSuccess(result.message);
                     await generateToken(formData); 
+                    location.reload();
                     router.push('/user');
-                    // location.reload();
                 } else {
                     setError(result.message);
                 }
@@ -55,7 +55,7 @@ const Login = () => {
                     setSuccess(result.message);
                     await generateToken(formData);
                     location.reload();
-                    router.push('/');
+                    router.push('/user');
                 } else {
                     setError(result.message);
                 }
