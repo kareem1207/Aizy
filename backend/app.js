@@ -3,6 +3,8 @@ import path from "path";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import { connectDB } from "./config/mongodb.config.js";
 
 dotenv.config();
 
@@ -19,18 +21,15 @@ app.use(
   })
 );
 
-// Body parsing middleware
 app.use(express.json());
 
-// Route handlers
 app.use("/auth", userRoutes);
 
-// Add a test endpoint
+app.use("/products", productRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "API is working!" });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({
@@ -41,5 +40,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
+  connectDB();
   console.log(`Server is running on http://localhost:${PORT}`);
 });
