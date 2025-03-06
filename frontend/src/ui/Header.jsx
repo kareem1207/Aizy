@@ -7,13 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const Header = () => {
-    // Initialize with null, will be updated after component mounts
     const [token, setToken] = useState(null);
-    
-    // Use useEffect to access sessionStorage after component mounts in browser
     useEffect(() => {
-        // This code only runs in the browser after render
-        setToken(sessionStorage.getItem("user_login_token"));
+        setToken(localStorage.getItem("user_login_token"));
     }, []);
     
     return (

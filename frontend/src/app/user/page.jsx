@@ -10,7 +10,7 @@ const User = () => {
     const [userData, setUserData] = useState({ name: "", email: "", role: "" });
     
     useEffect(() => {
-        const token = sessionStorage.getItem("user_login_token");
+        const token = localStorage.getItem("user_login_token");
         if (token) {
             try {
                 const decoded = jwt.decode(token);

@@ -147,14 +147,14 @@ export const useUserStore = create((set) => ({
     if (response.ok) {
       const data = await response.json();
       set(data.token);
-      sessionStorage.setItem("user_login_token", data.token);
+      localStorage.setItem("user_login_token", data.token);
     } else {
       console.error("Failed to generate token");
     }
   },
 
   logoutUser: () => {
-    sessionStorage.removeItem("user_login_token");
+    localStorage.removeItem("user_login_token");
     set({ user: null });
     return { success: true, message: "Logged out successfully" };
   },

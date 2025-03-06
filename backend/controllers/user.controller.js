@@ -21,9 +21,11 @@ export const createUser = async (req, res) => {
       });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: userData.email },
+    const existingUserMany = await prisma.user.findMany({
+      where: { email: userData.email, role: userData.role },
     });
+
+    const existingUser = existingUserMany[0];
 
     if (existingUser && existingUser.role === userData.role) {
       return res.status(400).json({
@@ -78,9 +80,11 @@ export const getUser = async (req, res) => {
         .json({ success: false, message: "Email and password are required" });
     }
 
-    const foundUser = await prisma.user.findUnique({
-      where: { email: email },
+    const foundUserMAny = await prisma.user.findMany({
+      where: { email: email, role: role },
     });
+
+    const foundUser = foundUserMAny[0];
 
     if (!foundUser) {
       return res.status(401).json({
@@ -132,14 +136,20 @@ export const generateUserToken = async (req, res) => {
       .json({ success: false, message: "User data is required." });
   }
 
+  console.log("User data:", user);
+
   if (!user.email) {
     return res
       .status(400)
       .json({ success: false, message: "Email is required." });
   }
-  const userPayLoad = await prisma.user.findUnique({
-    where: { email: user.email },
+  const userPayLoadArray = await prisma.user.findMany({
+    where: { AND: [{ email: user.email }, { role: user.userType }] },
   });
+
+  console.log("User payload array:", userPayLoadArray);
+
+  const userPayLoad = userPayLoadArray[0];
 
   if (!userPayLoad) {
     return res.status(404).json({

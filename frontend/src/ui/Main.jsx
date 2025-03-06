@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 export const Main = () => {
     const [role, setRole] = useState("customer");
     useEffect(() => {
-        const token = sessionStorage.getItem("user_login_token");
+        const token = localStorage.getItem("user_login_token");
         if (token) {
             const decoded = jwt.decode(token);
             setRole(decoded.role || "customer");
