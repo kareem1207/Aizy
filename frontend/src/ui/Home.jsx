@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from "@/components/Card";
-import data from "@/api/item/data.json";
+// import data from "@/api/item/data.json";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProductStore } from "@/store/productStore";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -72,13 +73,14 @@ const loadingVariants = {
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState([]);
+  const { getProducts } = useProductStore();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setProducts(data);
+        const data = await getProducts();
+        setProducts(data.products);
       } catch (error) {
         console.error("Error loading products:", error);
       } finally {
@@ -88,6 +90,7 @@ const Home = () => {
 
     loadData();
   }, []);
+console.log(products);
 
   return (
     <AnimatePresence mode="wait">

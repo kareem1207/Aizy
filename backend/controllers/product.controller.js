@@ -1,8 +1,7 @@
-import express from "express";
 import mongoose from "mongoose";
-import multer from "multer";
 import Product from "../database/mongodb/mongoSchema.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 export const addProduct = async (req, res) => {
@@ -13,7 +12,10 @@ export const addProduct = async (req, res) => {
       shortDescription,
       description,
       price,
-      sellers_name,
+      sellersName,
+      sellersEmail,
+      count,
+      rating,
     } = req.body;
     // const image = req.file.buffer;
 
@@ -23,6 +25,10 @@ export const addProduct = async (req, res) => {
       shortDescription,
       description,
       price,
+      sellersEmail,
+      sellersName,
+      count,
+      rating,
       //   image,
     });
     await product.save();
@@ -60,7 +66,6 @@ export const getProductById = async (req, res) => {
   try {
     const productId = req.params.id;
 
-    // Check if the ID is "create" or another special route and handle accordingly
     if (productId === "create") {
       return res.status(400).json({
         success: false,
@@ -68,7 +73,6 @@ export const getProductById = async (req, res) => {
       });
     }
 
-    // Validate that the ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
         success: false,
@@ -90,6 +94,132 @@ export const getProductById = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching product:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Invalid product ID" });
+  }
+  try {
+    await Product.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: "deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const product = req.body;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Invalid product ID" });
+  }
+  try {
+    const update = await Product.findByIdAndUpdate(id, product, { new: true });
+    res.status(200).json({ success: true, data: update });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+export const getProductsByEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    // Find products by seller email
+    const products = await Product.find({ sellersEmail: email });
+
+    // Add debug log
+    console.log(`Found ${products.length} products for email: ${email}`);
+
+    return res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error in getProductsByEmail:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getProductsByCategory = async (req, res) => {
+  try {
+    const category = req.params.category;
+    const products = await Product.find({ category }).sort({ createdAt: -1 });
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found in this category",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getProductsByName = async (req, res) => {
+  try {
+    const name = req.params.name;
+    const products = await Product.find({
+      name: { $regex: name, $options: "i" },
+    }).sort({ createdAt: -1 });
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found with this name",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching products by name:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getProductsByRating = async (req, res) => {
+  try {
+    const rating = req.params.rating;
+    const products = await Product.find({ rating }).sort({ createdAt: -1 });
+    if (!products || products.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found with this rating",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching products by rating:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

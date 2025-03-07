@@ -1,19 +1,30 @@
+import express from "express";
 import {
-  addProduct,
-  getProductById,
   getProducts,
+  getProductById,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  getProductsByCategory,
+  getProductsByEmail,
+  getProductsByRating,
 } from "../controllers/product.controller.js";
-import { Router } from "express";
-import multer from "multer";
 
-const router = Router();
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// Import the auth middleware
+import { authMiddleware } from "../middleware/auth.middleware.js";
 
-// Change from "/upload" to "/create" to avoid conflict with "/:id" parameter route
-router.post("/create", upload.single("image"), addProduct);
+const router = express.Router();
+
+// Public routes
 router.get("/", getProducts);
-
 router.get("/:id", getProductById);
+router.get("/category/:category", getProductsByCategory);
+router.get("/rating/:rating", getProductsByRating);
+
+// Protected routes that require authentication
+router.post("/create", addProduct);
+router.put("/:id", updateProduct);
+router.delete("/:id", deleteProduct);
+router.get("/seller/:email", getProductsByEmail);
 
 export default router;
