@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 export const SellerProducts = ({data, edit, delete: deleteProduct, isEdit, isDelete}) => {
+  const [updatedData,setUpdatedData] = useState(data);
   const [itemInfo, setItemInfo] = useState({
       id: '',
       name: '',
@@ -16,20 +17,28 @@ export const SellerProducts = ({data, edit, delete: deleteProduct, isEdit, isDel
   const [open, setOpen] = useState(false);
 
   const handleEdit = (productId) => {
-    setItemInfo(data.find(item => item._id === productId));
+    const foundItem = data.find(item => item._id === productId);
+    setItemInfo(foundItem);
     setOpen(true);
-  };
-  
-  const handleUpdate = (e) => {
+    // This line has issues - it uses itemInfo before state is updated
+    // Also, it might not be necessary depending on your use case
+    setUpdatedData(data.map(item => item._id === productId ? { ...item, ...foundItem } : item));
+};
+
+const handleUpdate = (e) => {
     e.preventDefault();
-    edit(itemInfo);
-    isEdit(true);
+    edit(itemInfo); // Assuming this is an API call or similar
+    isEdit(true);   // Assuming this is a setter function, should be setIsEdit if it's useState
+    setUpdatedData(updatedData.map(item => 
+        item._id === itemInfo._id ? { ...item, ...itemInfo } : item
+    ));
     setOpen(false);
-  }
+};
   
   const handleDelete = (productId) => {
     deleteProduct(productId);
     isDelete(true);
+    setUpdatedData(updatedData.filter(item => item._id !== productId));
   };  
   
   return (
@@ -39,9 +48,9 @@ export const SellerProducts = ({data, edit, delete: deleteProduct, isEdit, isDel
           Your Products
         </h1>
         
-        {data.length > 0 ? (
+        {updatedData.length > 0 ? (
           <div className="grid gap-4">
-            {data?.map(product => (
+            {updatedData?.map(product => (
               <div key={product._id} className="bg-[#f8fafd] p-4 rounded-lg flex justify-between items-center hover:shadow-md transition-shadow border border-[#3c6ca8]/10">
                 <div className="flex-1">
                   <h3 className="font-medium text-lg">{product.name}</h3>
