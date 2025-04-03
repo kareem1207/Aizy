@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+const api = process.env.NEXT_PUBLIC_BACKEND_API;
 export const useUserStore = create((set) => ({
   user: null,
   setUser: (user) => set({ user }),
@@ -22,7 +23,7 @@ export const useUserStore = create((set) => ({
         password: "****",
       });
 
-      const res = await fetch("http://localhost:5000/auth/register", {
+      const res = await fetch(`${api}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +76,7 @@ export const useUserStore = create((set) => ({
       return {
         success: false,
         message:
-          "Cannot connect to server. Please ensure your backend is running at http://localhost:5000",
+          "Cannot connect to server. Please ensure your backend is running at ${api}",
       };
     }
   },
@@ -88,7 +89,7 @@ export const useUserStore = create((set) => ({
         role: user.userType,
       };
 
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const res = await fetch(`${api}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,13 +131,13 @@ export const useUserStore = create((set) => ({
       return {
         success: false,
         message:
-          "Cannot connect to server. Please check if the backend is running at http://localhost:5000",
+          "Cannot connect to server. Please check if the backend is running at ${api}",
       };
     }
   },
 
   generateToken: async (user) => {
-    const response = await fetch("http://localhost:5000/auth/generate-token", {
+    const response = await fetch(`${api}/auth/generate-token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -157,5 +158,23 @@ export const useUserStore = create((set) => ({
     localStorage.removeItem("user_login_token");
     set({ user: null });
     return { success: true, message: "Logged out successfully" };
+  },
+
+  generateOtp: async () => {
+    const res = await fetch(`${api}/auth/generate-otp`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error generating OTP:", errorText);
+      return { success: false, message: "Failed to generate OTP" };
+    }
+
+    const data = await res.json();
+    return { success: true, message: "OTP generated successfully", data };
   },
 }));

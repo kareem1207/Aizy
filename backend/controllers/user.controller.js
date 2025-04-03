@@ -2,6 +2,7 @@ import { prisma } from "../config/prisma.config.js";
 import argon2 from "argon2";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import otpGenerator from "otp-generator";
 dotenv.config();
 
 export const createUser = async (req, res) => {
@@ -136,8 +137,6 @@ export const generateUserToken = async (req, res) => {
       .json({ success: false, message: "User data is required." });
   }
 
-  console.log("User data:", user);
-
   if (!user.email) {
     return res
       .status(400)
@@ -146,8 +145,6 @@ export const generateUserToken = async (req, res) => {
   const userPayLoadArray = await prisma.user.findMany({
     where: { AND: [{ email: user.email }, { role: user.userType }] },
   });
-
-  console.log("User payload array:", userPayLoadArray);
 
   const userPayLoad = userPayLoadArray[0];
 
@@ -167,4 +164,31 @@ export const generateUserToken = async (req, res) => {
 
   const token = jwt.sign(payload, secretKey);
   res.json({ success: true, token });
+};
+
+export const generateOTP = async (req, res) => {
+  const otp = otpGenerator.generate(6, {
+    upperCaseAlphabets: false,
+    specialChars: false,
+    lowerCaseAlphabets: false,
+    digits: true,
+  });
+
+  if (otp == "")
+    res.status(500).json({
+      success: false,
+      message: "Error generating OTP",
+    });
+  else {
+    const secretKey = process.env.JWT_SECRET;
+    const payload = {
+      otp: otp,
+    };
+    const token = jwt.sign(payload, secretKey, { expiresIn: "5m" });
+    res.status(200).json({
+      success: true,
+      message: "OTP generated successfully",
+      data: token,
+    });
+  }
 };
