@@ -43,7 +43,6 @@ export const useProductStore = create((set) => ({
 
       if (!data.success) return { success: false, message: data.message };
 
-      // Adjust based on your API response structure
       const productsArray = data.products || data.data || [];
       set({ products: productsArray });
 
@@ -150,8 +149,6 @@ export const useProductStore = create((set) => ({
       }
       const decoded = jwt.decode(token);
 
-      // Change the endpoint to match your backend route
-      // Using just "/seller" as the endpoint path
       const res = await fetch(
         `http://localhost:5000/api/products/seller/${decoded.email}`
       );
@@ -165,8 +162,6 @@ export const useProductStore = create((set) => ({
           message: data.message || "Failed to fetch seller products",
         };
       }
-
-      // Handle different possible data structures
       const productsArray = data.data || data.products || [];
       console.log("Setting products:", productsArray);
       set({ products: productsArray });

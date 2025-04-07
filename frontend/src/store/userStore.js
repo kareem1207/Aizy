@@ -446,7 +446,6 @@ export const useUserStore = create((set) => ({
       const data = await res.json();
 
       if (data.success) {
-        // Refresh the users list
         const { getAllUsers } = useUserStore.getState();
         await getAllUsers();
 
