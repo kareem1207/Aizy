@@ -373,3 +373,80 @@ export const getBannedUsers = async (req, res) => {
     });
   }
 };
+
+export const createAdmin = async (req, res) => {
+  try {
+    const { name, email, password, adminId } = req.body;
+
+    if (!name || !email || !password || !adminId) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    const currentAdminId = req.user.userId;
+
+    if (adminId !== currentAdminId) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Invalid admin ID. You are not authorized to create admin accounts.",
+      });
+    }
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only admins can create new admin accounts",
+      });
+    }
+
+    const existingUserMany = await prisma.user.findMany({
+      where: { email: email, role: "admin" },
+    });
+
+    const existingUser = existingUserMany[0];
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "An admin with this email already exists",
+      });
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    const hashedPassword = await argon2.hash(password);
+
+    const newAdmin = await prisma.user.create({
+      data: {
+        name: name,
+        email: email,
+        password: hashedPassword,
+        role: "admin",
+      },
+    });
+
+    const { password: _, ...adminWithoutPassword } = newAdmin;
+
+    console.log("Admin created successfully:", adminWithoutPassword);
+
+    res.status(201).json({
+      success: true,
+      message: "Admin created successfully",
+      data: adminWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Server error during admin creation:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server Error during admin creation",
+    });
+  }
+};

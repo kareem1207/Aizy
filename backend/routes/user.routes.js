@@ -9,6 +9,7 @@ import {
   banUser,
   unbanUser,
   getBannedUsers,
+  createAdmin,
 } from "../controllers/user.controller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
@@ -20,10 +21,10 @@ router.post("/login", getUser);
 router.post("/generate-token", generateUserToken);
 router.get("/generate-otp", generateOTP);
 
-// Admin routes (protected with auth middleware)
 router.get("/users", authMiddleware, getUsers);
 router.post("/ban-user", authMiddleware, banUser);
 router.post("/unban-user", authMiddleware, unbanUser);
 router.get("/banned-users", authMiddleware, getBannedUsers);
+router.post("/create-admin", authMiddleware, createAdmin);
 
 export default router;

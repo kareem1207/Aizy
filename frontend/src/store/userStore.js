@@ -395,4 +395,77 @@ export const useUserStore = create((set) => ({
       };
     }
   },
+
+  createAdmin: async (adminData) => {
+    try {
+      if (
+        !adminData.name ||
+        !adminData.email ||
+        !adminData.password ||
+        !adminData.adminId
+      ) {
+        return { success: false, message: "All fields are required" };
+      }
+
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/create-admin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: adminData.name,
+          email: adminData.email,
+          password: adminData.password,
+          adminId: adminData.adminId,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Refresh the users list
+        const { getAllUsers } = useUserStore.getState();
+        await getAllUsers();
+
+        return {
+          success: true,
+          message: data.message || "Admin created successfully",
+        };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to create admin",
+        };
+      }
+    } catch (error) {
+      console.error("Error creating admin:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
+  },
 }));

@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 const User = () => {
     const router = useRouter();
     const { logoutUser } = useUserStore();
-    const [userData, setUserData] = useState({ name: "", email: "", role: "" });
+    const [userData, setUserData] = useState({ name: "", email: "", role: "" , id:""});
+    const [isAdmin, setIsAdmin] = useState(false);
     useEffect(() => {
         const token = localStorage.getItem("user_login_token");
         
@@ -17,9 +18,14 @@ const User = () => {
                 setUserData({
                     name: decoded?.username || "Not Available",
                     email: decoded?.email || "Not Available",
-                    role: decoded?.role || "Not Available"
+                    role: decoded?.role || "Not Available",
+                    id: decoded?.userId || "Not Available",
                 });
-                console.log("Decoded Token:", decoded);
+                setIsAdmin(decoded?.role === "admin");
+                console.log("Decoded token:", decoded);
+                console.log("User ID:", decoded?.userId);
+                console.log("User Data",userData);
+                
             } catch (error) {
                 console.error("Error decoding token:", error);
             }
@@ -72,6 +78,37 @@ const User = () => {
                   </p>
                 </div>
               </div>
+              
+              {isAdmin && (
+  <div className="mt-8">
+    <h3 className="text-xl font-semibold mb-4 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      Admin Section
+    </h3>
+    <div className="grid md:grid-cols-3 gap-6">
+      <div className="bg-gradient-to-r from-[#3c6ca8]/10 to-[#3c6ca8]/5 p-5 rounded-lg shadow-sm border border-[#3c6ca8]/20 hover:shadow-md transition-shadow">
+        <p className="text-sm text-[#3c6ca8]/70 mb-2 uppercase tracking-wider font-medium">Admin ID</p>
+        <p className="text-lg font-medium flex items-center">
+          <span className="inline-block px-3 py-1 mr-2 text-sm rounded-md bg-[#3c6ca8] text-white font-semibold">
+            {userData.id}
+          </span>
+          <span className="text-[#3c6ca8]/60 text-sm">Privileged Access</span>
+        </p>
+      </div>
+      <div className="bg-gradient-to-r from-[#3c6ca8]/10 to-[#3c6ca8]/5 p-5 rounded-lg shadow-sm border border-[#3c6ca8]/20 hover:shadow-md transition-shadow">
+        <p className="text-sm text-[#3c6ca8]/70 mb-2 uppercase tracking-wider font-medium">Admin Controls</p>
+        <button className="px-4 py-2 bg-[#3c6ca8] text-white rounded-lg hover:bg-[#2a5080] transition-colors font-medium text-sm flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          Access Admin Panel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
             </div>
             
             <div className="mt-10 flex flex-col sm:flex-row justify-end gap-4">

@@ -5,18 +5,37 @@ import { Location } from "@/components/Location";
 import { SearchBar } from "@/components/SearchBar";
 import Image from "next/image";
 import Link from "next/link";
+import { useUserStore } from "@/store/userStore";
 
 export const Header = () => {
     const [token, setToken] = useState(null);
-    useEffect(() => {
-        setToken(localStorage.getItem("user_login_token"));
-    }, []);
+    const user = useUserStore(state => state.user);
     
+    useEffect(() => {
+        const checkToken = () => {
+            const storedToken = localStorage.getItem("user_login_token");
+            setToken(storedToken);
+            console.log("Token checked:", storedToken ? "Found" : "Not found");
+        };
+
+        checkToken();
+        
+        const handleStorageChange = (e) => {
+            if (e.key === "user_login_token") {
+                checkToken();
+            }
+        };
+        
+        window.addEventListener("storage", handleStorageChange);
+        
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, [user]); 
     return (
         <div className="sticky top-0 z-50 bg-[#fffcf6] shadow-sm">
             <header className="container mx-auto">
                 <div className="flex items-center h-16 px-4 gap-6">
-                    {/* Logo */}
                     <Link href="/" className="flex-shrink-0">
                         <Image 
                             src="/logo.jpg" 
@@ -27,17 +46,14 @@ export const Header = () => {
                         />
                     </Link>
 
-                    {/* Location */}
                     <div className="md:flex flex-shrink-0">
                         <Location />
                     </div>
 
-                    {/* Search Bar */}
                     <div className="md:flex flex-1 max-w-[600px]">
                         <SearchBar />
                     </div>
 
-                    {/* Language Selector */}
                     <div className="md:flex flex-shrink-0">
                         <Language />
                     </div>
@@ -52,13 +68,18 @@ export const Header = () => {
 
                     {token && (
                         <div className="md:flex flex-shrink-0">
-                            <Link href="/user" className="text-[#3c6ca8] hover:underline font-medium">
+                            <Link 
+                                href="/user" 
+                                className="text-[#3c6ca8] hover:underline font-medium"
+                                onClick={(e) => {
+                                    console.log("Account link clicked, navigating to /user");
+                                }}
+                            >
                                 Account 
                             </Link>
                         </div>
                     )}
 
-                    {/* Mobile Menu */}
                     <button className="md:hidden p-2 rounded-lg hover:bg-gray-100">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
