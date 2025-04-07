@@ -80,7 +80,7 @@ const Home = () => {
       try {
         setIsLoading(true);
         const data = await getProducts();
-        setProducts(data.products);
+        setProducts(data.data);
       } catch (error) {
         console.error("Error loading products:", error);
       } finally {
