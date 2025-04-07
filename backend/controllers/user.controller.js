@@ -94,6 +94,28 @@ export const getUser = async (req, res) => {
       });
     }
 
+    const bannedUser = await prisma.bannedUser.findUnique({
+      where: { userId: foundUser.id },
+    });
+
+    if (bannedUser) {
+      if (
+        bannedUser.bannedUntil &&
+        new Date() > new Date(bannedUser.bannedUntil)
+      ) {
+        await prisma.bannedUser.delete({
+          where: { userId: foundUser.id },
+        });
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: "Your account has been banned",
+          reason: bannedUser.reason,
+          bannedUntil: bannedUser.bannedUntil,
+        });
+      }
+    }
+
     const isPasswordValid = await argon2.verify(foundUser.password, password);
 
     if (!isPasswordValid) {
@@ -109,8 +131,6 @@ export const getUser = async (req, res) => {
         message: "User role mismatch",
       });
     }
-
-    // const { password: _, ...userWithoutPassword } = foundUser;
 
     console.log("User authenticated successfully:", foundUser);
     res.status(200).json({
@@ -189,6 +209,167 @@ export const generateOTP = async (req, res) => {
       success: true,
       message: "OTP generated successfully",
       data: token,
+    });
+  }
+};
+
+export const getUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!users) {
+      return res.status(404).json({
+        success: false,
+        message: "No users found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Server error while fetching users:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server Error while fetching users",
+    });
+  }
+};
+
+export const banUser = async (req, res) => {
+  try {
+    const { userId, reason, banDuration } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const existingBan = await prisma.bannedUser.findUnique({
+      where: { userId: userId },
+    });
+
+    if (existingBan) {
+      return res.status(400).json({
+        success: false,
+        message: "User is already banned",
+      });
+    }
+
+    let bannedUntil = null;
+    if (banDuration) {
+      bannedUntil = new Date();
+      bannedUntil.setDate(bannedUntil.getDate() + parseInt(banDuration));
+    }
+
+    const bannedUser = await prisma.bannedUser.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        reason: reason || "Violation of terms of service",
+        bannedUntil: bannedUntil,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User banned successfully",
+      data: bannedUser,
+    });
+  } catch (error) {
+    console.error("Error banning user:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error while banning user",
+    });
+  }
+};
+
+export const unbanUser = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const bannedUser = await prisma.bannedUser.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!bannedUser) {
+      return res.status(400).json({
+        success: false,
+        message: "This user is not banned",
+      });
+    }
+
+    await prisma.bannedUser.delete({
+      where: { userId: userId },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User unbanned successfully",
+    });
+  } catch (error) {
+    console.error("Error unbanning user:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error while unbanning user",
+    });
+  }
+};
+
+export const getBannedUsers = async (req, res) => {
+  try {
+    const bannedUsers = await prisma.bannedUser.findMany();
+
+    res.status(200).json({
+      success: true,
+      data: bannedUsers,
+    });
+  } catch (error) {
+    console.error("Error fetching banned users:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error while fetching banned users",
     });
   }
 };

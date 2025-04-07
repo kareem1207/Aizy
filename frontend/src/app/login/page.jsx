@@ -211,6 +211,7 @@ const Login = () => {
                                     <option value="customer">Customer</option>
                                     {isLogin && (<option value="admin">Admin</option>)}
                                     <option value="seller">Seller</option>
+                                    <option value="admin">Admin</option>
                                 </select>
                                 <div className="pointer-events-none absolute right-0 top-1/2 mt-2 flex items-center px-2 text-[#3c6ca8]">
                                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

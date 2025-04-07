@@ -23,6 +23,6 @@
   "type": "module",
   "description": "",
   "devDependencies": {
-    "prisma": "^6.4.1"
+    "prisma": "^6.5.0"
   }
 }

@@ -1,9 +1,12 @@
 import { create } from "zustand";
 
-const api = process.env.NEXT_PUBLIC_BACKEND_API;
+const api = process.env.NEXT_PUBLIC_BACKEND_API || "http://localhost:5000";
 export const useUserStore = create((set) => ({
   user: null,
+  users: [],
+  bannedUsers: [],
   setUser: (user) => set({ user }),
+
   createUser: async (user) => {
     if (!user.password || !user.email || !user.name) {
       return { success: false, message: "Please provide all fields" };
@@ -34,13 +37,11 @@ export const useUserStore = create((set) => ({
 
       console.log("Fetch response status:", res.status);
 
-      // Parse JSON only if response is ok
       if (!res.ok) {
         const errorText = await res.text();
         console.error("Error response:", errorText);
 
         try {
-          // Try to parse as JSON if possible
           const errorData = JSON.parse(errorText);
           return {
             success: false,
@@ -48,7 +49,6 @@ export const useUserStore = create((set) => ({
               errorData.message || `Error: ${res.status} ${res.statusText}`,
           };
         } catch (e) {
-          // If not JSON, return the text or status
           return {
             success: false,
             message: errorText || `Error: ${res.status} ${res.statusText}`,
@@ -176,5 +176,223 @@ export const useUserStore = create((set) => ({
 
     const data = await res.json();
     return { success: true, message: "OTP generated successfully", data };
+  },
+
+  getAllUsers: async () => {
+    try {
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/users`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        set({ users: data.data });
+        return { success: true, data: data.data };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to fetch users",
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
+  },
+
+  getBannedUsers: async () => {
+    try {
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/banned-users`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        set({ bannedUsers: data.data });
+        return { success: true, data: data.data };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to fetch banned users",
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching banned users:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
+  },
+
+  banUser: async (userId, reason, banDuration) => {
+    try {
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/ban-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          reason,
+          banDuration,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        const { getBannedUsers } = useUserStore.getState();
+        await getBannedUsers();
+        return {
+          success: true,
+          message: data.message || "User banned successfully",
+        };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to ban user",
+        };
+      }
+    } catch (error) {
+      console.error("Error banning user:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
+  },
+
+  unbanUser: async (userId) => {
+    try {
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/unban-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        const { getBannedUsers } = useUserStore.getState();
+        await getBannedUsers();
+        return {
+          success: true,
+          message: data.message || "User unbanned successfully",
+        };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to unban user",
+        };
+      }
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
   },
 }));

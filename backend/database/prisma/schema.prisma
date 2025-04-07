@@ -18,3 +18,14 @@ model User {
 
   @@unique([email, role])
 }
+
+model BannedUser {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  email       String
+  name        String
+  reason      String?
+  bannedUntil DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+}
