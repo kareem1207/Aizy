@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Product from "../database/mongodb/mongoSchema.js";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 dotenv.config();
 
 export const addProduct = async (req, res) => {
@@ -16,8 +15,17 @@ export const addProduct = async (req, res) => {
       sellersEmail,
       count,
       rating,
+      image,
+      imageType,
     } = req.body;
-    // const image = req.file.buffer;
+
+    if (image && image.length > 5 * 1024 * 1024) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Image size too large. Please upload an image smaller than 5MB.",
+      });
+    }
 
     const product = new Product({
       name,
@@ -29,7 +37,8 @@ export const addProduct = async (req, res) => {
       sellersName,
       count,
       rating,
-      //   image,
+      image,
+      imageType,
     });
     await product.save();
     res.status(201).json({
@@ -39,6 +48,40 @@ export const addProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding product:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getProductImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID format",
+      });
+    }
+
+    const product = await Product.findById(id).select("image imageType");
+
+    if (!product || !product.image) {
+      return res.status(404).json({
+        success: false,
+        message: "Product image not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      image: product.image,
+      imageType: product.imageType || "image/jpeg",
+    });
+  } catch (error) {
+    console.error("Error fetching product image:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -125,6 +168,14 @@ export const updateProduct = async (req, res) => {
       .status(404)
       .json({ success: false, message: "Invalid product ID" });
   }
+  g;
+  if (product.image && product.image.length > 5 * 1024 * 1024) {
+    return res.status(400).json({
+      success: false,
+      message: "Image size too large. Please upload an image smaller than 5MB.",
+    });
+  }
+
   try {
     const update = await Product.findByIdAndUpdate(id, product, { new: true });
     res.status(200).json({ success: true, data: update });
@@ -136,11 +187,8 @@ export const updateProduct = async (req, res) => {
 export const getProductsByEmail = async (req, res) => {
   try {
     const { email } = req.params;
-
-    // Find products by seller email
     const products = await Product.find({ sellersEmail: email });
 
-    // Add debug log
     console.log(`Found ${products.length} products for email: ${email}`);
 
     return res.status(200).json({

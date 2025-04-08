@@ -16,10 +16,9 @@ const productSchema = mongoose.Schema(
       required: true,
     },
     sellersEmail: {
-      // Changed from having a unique index
       type: String,
       required: false,
-      default: "", // Providing a default value to avoid null
+      default: "",
     },
     shortDescription: {
       type: String,
@@ -42,18 +41,19 @@ const productSchema = mongoose.Schema(
       required: false,
       default: 0,
     },
-    // image: {
-    //   type: Buffer,
-    //   required: true,
-    // },
+    image: {
+      type: String,
+      required: false,
+    },
+    imageType: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
   }
 );
-
-// Remove any existing unique index on sellersEmail if it exists
-// You'll need to do this in your MongoDB directly or via Mongoose connection
 
 const Product = mongoose.model("Product", productSchema);
 

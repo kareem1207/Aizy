@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from "@/components/Card";
-// import data from "@/api/item/data.json";
+// import data from "@/api/item/data.json";  
 import { motion, AnimatePresence } from "framer-motion";
 import { useProductStore } from "@/store/productStore";
 
@@ -89,8 +89,9 @@ const Home = () => {
     };
 
     loadData();
-  }, []);
-console.log(products);
+  }, [getProducts]);
+  
+  console.log(products);
 
   return (
     <AnimatePresence mode="wait">

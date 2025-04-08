@@ -1,13 +1,13 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useProductStore } from '@/store/productStore'
-import jwt, { decode } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { useRouter } from "next/navigation";
 
 const Page = () => {
   const router = useRouter();
   const [token, setToken] = useState(null);
-  const [decoded, setDecoded] = useState(null);
+  const [decoded, setDecoded] = useState(null);  
   const { createProduct } = useProductStore();
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -18,18 +18,20 @@ const Page = () => {
     price: 0,
     sellersName: '',
     count: 0,
+    image: '',
+    imageType: '',
   });
+  const [imagePreview, setImagePreview] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     console.log("In useEffect");
-    // Access localStorage only on the client side
     const storedToken = window.localStorage.getItem("user_login_token");
     if (storedToken) {
       setToken(storedToken);
     }
   }, []);
 
-  // Add a second useEffect that runs when token changes
   useEffect(() => {
     if (token) {
       try {
@@ -40,7 +42,7 @@ const Page = () => {
         if (decodedToken && decodedToken.email) {
           setNewProduct(prev => ({
             ...prev,
-            sellersEmail: decodedToken.email  // Change from 'email' to 'sellersEmail'
+            sellersEmail: decodedToken.email  
           }));
         }
       } catch (error) {
@@ -50,7 +52,7 @@ const Page = () => {
   }, [token]);
 
   const handleCreateProduct = async (productData) => {
-    console.log("in nhcp"+productData);
+    console.log("Creating new product:", productData);
     const res = await createProduct(productData);
     if (res.success) {
       alert(res.message);
@@ -63,8 +65,11 @@ const Page = () => {
             price: 0,
             sellersName: '',
             count: 0,
+            image: '',
+            imageType: '',
         });
-        router.push('/'); // Redirect to the home page or any other page
+        setImagePreview('');
+        router.push('/'); 
     } else {
       alert(res.message);
     }
@@ -80,11 +85,81 @@ const Page = () => {
       description: e.target.description.value,
       price: parseFloat(e.target.price.value),
       sellersName: e.target.sellersName.value,
-      sellersEmail: newProduct.sellersEmail, // Make sure the email is properly included
+      sellersEmail: newProduct.sellersEmail, 
       count: parseInt(e.target.count.value, 10),
+      image: newProduct.image,
+      imageType: newProduct.imageType,
     };
     console.log(updatedProduct);
     handleCreateProduct(updatedProduct);
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPEG, PNG, GIF, or WEBP)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please upload an image smaller than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    
+    const reader = new FileReader();
+    
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      const MAX_WIDTH = 1200;
+      const MAX_HEIGHT = 1200;
+      
+      if (width > height && width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      } else if (height > MAX_HEIGHT) {
+        width = Math.round((width * MAX_HEIGHT) / height);
+        height = MAX_HEIGHT;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const quality = file.type === 'image/jpeg' ? 0.85 : 0.9;
+      const base64String = canvas.toDataURL(file.type, quality);
+      
+      setNewProduct({
+        ...newProduct,
+        image: base64String,
+        imageType: file.type
+      });
+      setImagePreview(base64String);
+      setIsUploading(false);
+    };
+    
+    img.onerror = () => {
+      alert('Error processing the image');
+      setIsUploading(false);
+    };
+    
+    reader.onloadend = () => {
+      img.src = reader.result;
+    };
+    reader.onerror = () => {
+      alert('Error reading the file');
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
     
   return (
@@ -141,6 +216,59 @@ const Page = () => {
               />
             </div>
             
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-[#3c6ca8]/70">Product Image</label>
+              <div className="border-2 border-dashed border-[#3c6ca8]/30 rounded-lg p-4 text-center relative">
+                {imagePreview ? (
+                  <div className="relative mx-auto w-full max-w-[300px] aspect-square mb-4">
+                    <img
+                      src={imagePreview}
+                      alt="Product preview" 
+                      className="rounded-md object-contain w-full h-full"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImagePreview('');
+                        setNewProduct({...newProduct, image: '', imageType: ''});
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div onClick={() => document.getElementById('image-upload').click()} className="cursor-pointer">
+                    <div className="py-8">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-[#3c6ca8]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="mt-2 text-sm text-[#3c6ca8]/60">Click to upload or drag and drop</p>
+                      <p className="text-xs text-[#3c6ca8]/40 mt-1">PNG, JPG, GIF or WEBP (max. 5MB)</p>
+                    </div>
+                  </div>
+                )}
+                
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/jpeg, image/png, image/gif, image/webp"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
+                />
+                
+                {isUploading && (
+                  <div className="mt-2 text-[#3c6ca8]">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#3c6ca8] mx-auto"></div>
+                    <p className="text-sm mt-1">Uploading...</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
             <div className="grid md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-[#3c6ca8]/70">Price</label>
@@ -188,6 +316,7 @@ const Page = () => {
               <button 
                 type="submit"
                 className="px-6 py-3 bg-[#3c6ca8] text-white rounded-lg hover:bg-[#3c6ca8]/90 transition-colors font-medium flex items-center justify-center w-full md:w-auto"
+                disabled={isUploading}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

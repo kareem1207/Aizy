@@ -16,6 +16,13 @@ export const useProductStore = create((set) => ({
         return { success: false, message: "No authentication token found" };
       }
 
+      if (newProduct.image && newProduct.image.length > 7000000) {
+        return {
+          success: false,
+          message: "Image is too large. Please use an image smaller than 5MB",
+        };
+      }
+
       const res = await fetch("http://localhost:5000/api/products/create", {
         method: "POST",
         headers: {
@@ -25,6 +32,24 @@ export const useProductStore = create((set) => ({
         body: JSON.stringify(newProduct),
       });
 
+      if (!res.ok) {
+        const errorText = await res.text();
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorJson.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (parseError) {
+          return {
+            success: false,
+            message: `Server error: ${res.status} ${res.statusText}. Try with a smaller image.`,
+          };
+        }
+      }
+
       const data = await res.json();
       if (!data.success) return { success: false, message: data.message };
 
@@ -32,7 +57,10 @@ export const useProductStore = create((set) => ({
       return { success: true, message: "Product created" };
     } catch (error) {
       console.error("Error creating product:", error);
-      return { success: false, message: "Failed to create product" };
+      return {
+        success: false,
+        message: `Failed to create product: ${error.message}`,
+      };
     }
   },
 
@@ -116,6 +144,34 @@ export const useProductStore = create((set) => ({
     } catch (error) {
       console.error("Error fetching product:", error);
       return { success: false, message: "Failed to fetch product" };
+    }
+  },
+
+  getProductImage: async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/image/${id}`);
+
+      if (!res.ok) {
+        return {
+          success: false,
+          message: `Failed to fetch image: ${res.status} ${res.statusText}`,
+        };
+      }
+
+      const data = await res.json();
+
+      if (!data.success) {
+        return { success: false, message: data.message };
+      }
+
+      return {
+        success: true,
+        image: data.image,
+        imageType: data.imageType,
+      };
+    } catch (error) {
+      console.error("Error fetching product image:", error);
+      return { success: false, message: "Failed to fetch product image" };
     }
   },
 

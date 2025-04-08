@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const SellerProducts = ({data, edit, delete: deleteProduct, isEdit, isDelete}) => {
-  const [updatedData,setUpdatedData] = useState(data);
+  const [updatedData, setUpdatedData] = useState(data);
   const [itemInfo, setItemInfo] = useState({
       id: '',
       name: '',
@@ -13,33 +13,110 @@ export const SellerProducts = ({data, edit, delete: deleteProduct, isEdit, isDel
       price: 0,
       sellersName: '',
       count: 0,
+      image: '',
+      imageType: '',
   });
   const [open, setOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    setUpdatedData(data);
+  }, [data]);
 
   const handleEdit = (productId) => {
     const foundItem = data.find(item => item._id === productId);
     setItemInfo(foundItem);
+    if (foundItem.image) {
+      setImagePreview(foundItem.image);
+    }
     setOpen(true);
-    // This line has issues - it uses itemInfo before state is updated
-    // Also, it might not be necessary depending on your use case
-    setUpdatedData(data.map(item => item._id === productId ? { ...item, ...foundItem } : item));
-};
+  };
 
-const handleUpdate = (e) => {
+  const handleUpdate = (e) => {
     e.preventDefault();
-    edit(itemInfo); // Assuming this is an API call or similar
-    isEdit(true);   // Assuming this is a setter function, should be setIsEdit if it's useState
+    edit(itemInfo); 
+    isEdit(true);   
     setUpdatedData(updatedData.map(item => 
         item._id === itemInfo._id ? { ...item, ...itemInfo } : item
     ));
     setOpen(false);
-};
+  };
   
   const handleDelete = (productId) => {
     deleteProduct(productId);
     isDelete(true);
     setUpdatedData(updatedData.filter(item => item._id !== productId));
   };  
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPEG, PNG, GIF, or WEBP)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please upload an image smaller than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    
+    const reader = new FileReader();
+    
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      const MAX_WIDTH = 1200;
+      const MAX_HEIGHT = 1200;
+      
+      if (width > height && width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      } else if (height > MAX_HEIGHT) {
+        width = Math.round((width * MAX_HEIGHT) / height);
+        height = MAX_HEIGHT;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const quality = file.type === 'image/jpeg' ? 0.85 : 0.9;
+      const base64String = canvas.toDataURL(file.type, quality);
+      
+      setItemInfo({
+        ...itemInfo,
+        image: base64String,
+        imageType: file.type
+      });
+      setImagePreview(base64String);
+      setIsUploading(false);
+    };
+    
+    img.onerror = () => {
+      alert('Error processing the image');
+      setIsUploading(false);
+    };
+    
+    reader.onloadend = () => {
+      img.src = reader.result;
+    };
+    reader.onerror = () => {
+      alert('Error reading the file');
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
   
   return (
     <div className="min-h-screen bg-[#fffcf6] text-[#3c6ca8] p-4 md:p-8 font-sans">
@@ -52,12 +129,29 @@ const handleUpdate = (e) => {
           <div className="grid gap-4">
             {updatedData?.map(product => (
               <div key={product._id} className="bg-[#f8fafd] p-4 rounded-lg flex justify-between items-center hover:shadow-md transition-shadow border border-[#3c6ca8]/10">
-                <div className="flex-1">
-                  <h3 className="font-medium text-lg">{product.name}</h3>
-                  <div className="flex items-center mt-1 text-sm">
-                    <span className="bg-[#edf3fa] px-2 py-0.5 rounded-md text-[#3c6ca8]/80">{product.category}</span>
-                    <span className="ml-3 text-[#3c6ca8]/60">${product.price}</span>
-                    <span className="ml-3 text-[#3c6ca8]/60">{product.count} in stock</span>
+                <div className="flex items-center flex-1">
+                  {product.image ? (
+                    <div className="h-16 w-16 mr-4 rounded-lg overflow-hidden flex-shrink-0">
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-16 w-16 mr-4 rounded-lg bg-[#e9f0f9] flex items-center justify-center flex-shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#3c6ca8]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-medium text-lg">{product.name}</h3>
+                    <div className="flex items-center mt-1 text-sm">
+                      <span className="bg-[#edf3fa] px-2 py-0.5 rounded-md text-[#3c6ca8]/80">{product.category}</span>
+                      <span className="ml-3 text-[#3c6ca8]/60">${product.price}</span>
+                      <span className="ml-3 text-[#3c6ca8]/60">{product.count} in stock</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex space-x-2">
@@ -106,6 +200,56 @@ const handleUpdate = (e) => {
               </div>
               
               <form onSubmit={handleUpdate} className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-[#3c6ca8]/70 mb-1">Product Image</label>
+                  <div className="border-2 border-dashed border-[#3c6ca8]/30 rounded-lg p-4 text-center relative">
+                    {imagePreview ? (
+                      <div className="relative mx-auto w-full max-w-[300px] aspect-square mb-4">
+                        <img
+                          src={imagePreview}
+                          alt="Product preview" 
+                          className="rounded-md object-contain w-full h-full"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview('');
+                            setItemInfo({...itemInfo, image: '', imageType: ''});
+                          }}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-[#3c6ca8]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="mt-2 text-sm text-[#3c6ca8]/60">Click to upload or drag and drop</p>
+                        <p className="text-xs text-[#3c6ca8]/40 mt-1">PNG, JPG, GIF or WEBP (max. 5MB)</p>
+                      </div>
+                    )}
+                    
+                    <input
+                      type="file"
+                      accept="image/jpeg, image/png, image/gif, image/webp"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                    
+                    {isUploading && (
+                      <div className="mt-2 text-[#3c6ca8]">
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#3c6ca8] mx-auto"></div>
+                        <p className="text-sm mt-1">Uploading...</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-[#3c6ca8]/70 mb-1">Product Name</label>
                   <input
@@ -205,6 +349,7 @@ const handleUpdate = (e) => {
                   <button 
                     type="submit"
                     className="px-4 py-2 bg-[#3c6ca8] text-white rounded-lg hover:bg-[#3c6ca8]/90"
+                    disabled={isUploading}
                   >
                     Update Product
                   </button>
