@@ -467,4 +467,105 @@ export const useUserStore = create((set) => ({
       };
     }
   },
+
+  getUserProfile: async () => {
+    try {
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/profile`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        return { success: true, data: data.data };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to fetch profile",
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
+  },
+
+  updateProfile: async (profileData) => {
+    try {
+      const token = localStorage.getItem("user_login_token");
+      if (!token) {
+        return { success: false, message: "Authentication required" };
+      }
+
+      const res = await fetch(`${api}/auth/update-profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        try {
+          const errorData = JSON.parse(errorText);
+          return {
+            success: false,
+            message:
+              errorData.message || `Error: ${res.status} ${res.statusText}`,
+          };
+        } catch (e) {
+          return {
+            success: false,
+            message: errorText || `Error: ${res.status} ${res.statusText}`,
+          };
+        }
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        return { success: true, data: data.data, message: data.message };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Failed to update profile",
+        };
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return {
+        success: false,
+        message: "Cannot connect to server",
+      };
+    }
+  },
 }));
