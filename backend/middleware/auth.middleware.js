@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 
 export const authMiddleware = (req, res, next) => {
   try {
-    // Get token from header
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -11,8 +10,6 @@ export const authMiddleware = (req, res, next) => {
         message: "Unauthorized: No token provided",
       });
     }
-
-    // Extract token
     const token = authHeader.split(" ")[1];
 
     if (!token) {
@@ -21,14 +18,9 @@ export const authMiddleware = (req, res, next) => {
         message: "Unauthorized: No token provided",
       });
     }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Add user info to request
+    const decoded = jwt.v;
     req.user = decoded;
 
-    // Continue to the next middleware/controller
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);
