@@ -1,7 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useCartStore } from "../store/cartStore";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
