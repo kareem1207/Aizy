@@ -18,7 +18,8 @@ export const authMiddleware = (req, res, next) => {
         message: "Unauthorized: No token provided",
       });
     }
-    const decoded = jwt.v;
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
 
     next();

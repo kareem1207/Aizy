@@ -32,7 +32,6 @@ const formatDate = (dateString) => {
 
 export const Card = ({ card }) => {
   const [flippedCards, setFlippedCards] = useState({});
-  const { addToCart } = useCartStore();
   const [loadingProductId, setLoadingProductId] = useState(null);
   
   if (!card) {
