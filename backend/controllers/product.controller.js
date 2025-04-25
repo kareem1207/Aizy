@@ -168,7 +168,6 @@ export const updateProduct = async (req, res) => {
       .status(404)
       .json({ success: false, message: "Invalid product ID" });
   }
-  g;
   if (product.image && product.image.length > 5 * 1024 * 1024) {
     return res.status(400).json({
       success: false,
