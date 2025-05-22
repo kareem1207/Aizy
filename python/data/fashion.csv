@@ -1,0 +1,189 @@
+product_name,category,gender,region,occasion
+Sherwani,Ethnic Wear,boy,north_india,wedding
+Lehenga,Ethnic Wear,girl,north_india,wedding
+Pathani Suit,Ethnic Wear,boy,hyderabad,ramzan
+Kurti,Ethnic Wear,girl,north_india,dasara
+Gown,Western Wear,girl,all,birthday
+T-shirt,Western Wear,boy,all,birthday
+White Kurta,Ethnic Wear,boy,north_india,independence_day
+Anarkali,Ethnic Wear,girl,hyderabad,ramzan
+Saree,Ethnic Wear,girl,south_india,onam
+Dhoti Kurta,Ethnic Wear,boy,south_india,pongal
+Ghagra Choli,Ethnic Wear,girl,gujarat,navratri
+Bandhgala,Ethnic Wear,boy,rajasthan,diwali
+Salwar Kameez,Ethnic Wear,girl,punjab,lohri
+Pattu Pavadai,Ethnic Wear,girl,tamil_nadu,deepavali
+Kurta Pajama,Ethnic Wear,boy,all_india,holi
+Indo-Western Dress,Fusion Wear,girl,metro_cities,reception_party
+Jodhpuri Suit,Ethnic Wear,boy,jodhpur,formal_event
+Kanjeevaram Saree,Ethnic Wear,girl,tamil_nadu,temple_visit
+Churidhar,Ethnic Wear,girl,all_india,ganesh_chaturthi
+Nehru Jacket,Ethnic Wear,boy,all_india,raksha_bandhan
+Frock,Western Wear,girl,all,christmas_party
+Suit,Western Wear,boy,all,new_year_eve
+Kimono,Ethnic Wear,girl,japan,cherry_blossom_festival
+Hanbok,Ethnic Wear,boy,korea,chuseok
+Dirndl,Ethnic Wear,girl,germany,oktoberfest
+Lederhosen,Ethnic Wear,boy,germany,oktoberfest
+Kilt,Ethnic Wear,boy,scotland,highland_games
+Abaya,Ethnic Wear,girl,middle_east,eid
+Thobe,Ethnic Wear,boy,middle_east,eid_al_fitr
+Ao Dai,Ethnic Wear,girl,vietnam,tet_festival
+Barong Tagalog,Ethnic Wear,boy,philippines,fiesta
+Dashiki,Ethnic Wear,boy,africa,cultural_festival
+Kaftan,Ethnic Wear,girl,africa,cultural_festival
+Pheran,Ethnic Wear,boy,kashmir,winter_festival
+Mekhela Chador,Ethnic Wear,girl,assam,bihu
+Punjabi Suit,Ethnic Wear,girl,punjab,baisakhi
+Mundu,Ethnic Wear,boy,kerala,vishu
+Langa Voni,Ethnic Wear,girl,andhra_pradesh,sankranti
+Blazer,Western Wear,boy,all,graduation_ceremony
+Cocktail Dress,Western Wear,girl,all,anniversary_dinner
+Chaniya Choli,Ethnic Wear,girl,gujarat,garba_night
+Sherwani Junior,Ethnic Wear,boy,north_india,family_function
+Sharara Suit,Ethnic Wear,girl,lucknow,eid_milad_un_nabi
+Dhoti Pants with Kurta,Fusion Wear,boy,metro_cities,mehendi_ceremony
+Peplum Top with Skirt,Fusion Wear,girl,all,sangeet_ceremony
+Achkan,Ethnic Wear,boy,uttar_pradesh,durga_puja
+Garara,Ethnic Wear,girl,pakistan,nikaah
+Tuxedo,Western Wear,boy,all,black_tie_event
+Ball Gown,Western Wear,girl,all,prom_night
+Cheongsam,Ethnic Wear,girl,china,chinese_new_year
+Samfu,Ethnic Wear,boy,china,chinese_new_year
+Santa Claus Costume,Costume,boy,all,christmas
+Easter Bunny Costume,Costume,girl,all,easter
+Halloween Costume,Costume,boy,all,halloween
+Fairy Dress,Costume,girl,all,fantasy_party
+Superhero Cape,Costume,boy,all,comic_con
+Traditional Veshti,Ethnic Wear,boy,south_india,upanayanam
+Kasavu Saree,Ethnic Wear,girl,kerala,onam_sadya
+Bomber Jacket,Western Wear,boy,all,casual_outing
+Denim Skirt,Western Wear,girl,all,picnic
+Tracksuit,Sportswear,boy,all,sports_day
+Leotard,Sportswear,girl,all,gymnastics_competition
+Swim Trunks,Swimwear,boy,all,beach_vacation
+Bikini,Swimwear,girl,all,pool_party
+Snowsuit,Outerwear,boy,cold_regions,ski_trip
+Parka,Outerwear,girl,cold_regions,winter_holiday
+Kurta Dhoti Set,Ethnic Wear,boy,bengal,saraswati_puja
+Benarasi Saree,Ethnic Wear,girl,varanasi,bengali_wedding
+Kedia Dhoti,Ethnic Wear,boy,gujarat,dandiya_raas
+Patiala Salwar,Ethnic Wear,girl,punjab,gurpurab
+Angrakha Kurta,Ethnic Wear,boy,rajasthan,teej_festival
+Leheriya Saree,Ethnic Wear,girl,rajasthan,gangaur_festival
+Trench Coat,Outerwear,boy,all,rainy_season
+Raincoat,Outerwear,girl,all,monsoon
+Ethnic Jacket,Ethnic Wear,boy,all_india,festive_gathering
+Palazzo Suit,Ethnic Wear,girl,all_india,kitty_party
+Jumpsuit,Western Wear,girl,all,brunch
+Shorts and Shirt,Western Wear,boy,all,summer_camp
+Wrap Dress,Western Wear,girl,all,date_night
+Dungarees,Western Wear,boy,all,playdate
+Floral Dress,Western Wear,girl,all,spring_festival
+Linen Shirt,Western Wear,boy,all,tropical_vacation
+Kaftan Dress,Resort Wear,girl,all,beach_resort_stay
+Breeches,Equestrian Wear,boy,all,horse_riding
+Riding Jacket,Equestrian Wear,girl,all,show_jumping
+Karate Gi,Sportswear,boy,all,karate_competition
+Ballet Tutu,Sportswear,girl,all,ballet_recital
+Quinceañera Dress,Formal Wear,girl,latin_america,quinceanera
+Mariachi Suit,Ethnic Wear,boy,mexico,cinco_de_mayo
+Samba Costume,Performance Wear,girl,brazil,carnival
+Highland Dress,Ethnic Wear,girl,scotland,ceilidh
+Kanzu,Ethnic Wear,boy,east_africa,jumuah_prayer
+Gomesi,Ethnic Wear,girl,uganda,introduction_ceremony
+Bubba and Sokoto,Ethnic Wear,boy,nigeria,yoruba_wedding
+Iro and Buba,Ethnic Wear,girl,nigeria,aso_ebi
+Lungi,Ethnic Wear,boy,south_east_asia,daily_wear
+Sarong,Ethnic Wear,girl,south_east_asia,beach_wear
+Kimono Jacket,Fusion Wear,boy,all,fashion_statement
+Saree Gown,Fusion Wear,girl,metro_cities,modern_wedding
+Dhoti Skirt,Fusion Wear,girl,all_india,contemporary_ethnic
+Nehru Collar Shirt,Fusion Wear,boy,all_india,smart_casual_event
+Bandhani Dupatta with Plain Suit,Ethnic Wear,girl,gujarat,rakhi
+Khadi Kurta,Ethnic Wear,boy,all_india,gandhi_jayanti
+Silk Pavadai,Ethnic Wear,girl,south_india,naming_ceremony
+Velvet Sherwani,Ethnic Wear,boy,north_india,winter_wedding
+Net Lehenga,Ethnic Wear,girl,all_india,engagement_party
+Overalls,Western Wear,boy,all,gardening
+Maxi Dress,Western Wear,girl,all,summer_evening_party
+Polo Shirt,Western Wear,boy,all,golf_outing
+Skater Dress,Western Wear,girl,all,casual_friday
+Ethnic Print Shirt,Fusion Wear,boy,all,cultural_day_at_school
+Crop Top with Ethnic Skirt,Fusion Wear,girl,all,college_fest
+Puanchei,Ethnic Wear,girl,mizoram,chapchar_kut
+Tapu Gaale,Ethnic Wear,boy,arunachal_pradesh,solung_festival
+Innaphi and Phanek,Ethnic Wear,girl,manipur,ningol_chakouba
+Jainsem,Ethnic Wear,girl,meghalaya,shad_suk_mynsiem
+Dhotar,Ethnic Wear,boy,maharashtra,gudi_padwa
+Nauvari Saree,Ethnic Wear,girl,maharashtra,ganesh_utsav_cultural_program
+Green T-shirt and Jeans,Western Wear,boy,ireland,st_patricks_day
+Green Dress,Western Wear,girl,ireland,st_patricks_day_parade
+Casual Sweater and Pants,Western Wear,boy,usa,thanksgiving_dinner
+Autumn Themed Dress,Western Wear,girl,usa,thanksgiving_family_gathering
+Mardi Gras Beads and T-shirt,Costume,boy,new_orleans,mardi_gras_parade
+Colorful Feathered Outfit,Costume,girl,new_orleans,mardi_gras_ball
+Sugar Skull Face Paint and Suit,Costume,boy,mexico,day_of_the_dead_celebration
+La Catrina Dress,Costume,girl,mexico,dia_de_los_muertos_altar
+Floral Shirt and Shorts,Western Wear,boy,thailand,songkran_water_festival
+Waterproof Top and Shorts,Western Wear,girl,thailand,songkran_festival
+Maternity Gown,Maternity Wear,girl,all,baby_shower
+Smart Casual Shirt and Chinos,Western Wear,boy,all,baby_shower_guest
+Simple Cotton Kurti,Ethnic Wear,girl,all_india,griha_pravesh_puja
+Formal Shirt and Trousers,Western Wear,boy,all_india,housewarming_party
+White Communion Dress,Religious Wear,girl,all,first_communion
+White Suit or Formal Shirt & Pants,Religious Wear,boy,all,first_communion
+Formal Gown,Formal Wear,girl,all,bat_mitzvah
+Dark Suit and Tie,Formal Wear,boy,all,bar_mitzvah
+Sparkly Party Dress,Western Wear,girl,all,sweet_sixteen_party
+Smart Blazer and Jeans,Western Wear,boy,all,sweet_sixteen_celebration
+Lab Coat and Goggles Prop,Costume,boy,all,science_fair_presentation
+School Uniform with Badge,Uniform,girl,all,debate_competition
+Character Costume for Play,Costume,boy,school,annual_day_drama
+Themed Dance Costume,Performance Wear,girl,school,annual_day_dance
+Sports Jersey and Shorts,Sportswear,boy,school,inter_school_sports_meet
+Track Pants and T-shirt,Sportswear,girl,school,sports_practice
+Formal Shirt and Tie,Formal Wear,boy,all,internship_interview
+Business Casual Dress,Formal Wear,girl,all,youth_conference
+Warm Jacket and Beanie,Outerwear,boy,all,bonfire_night
+Cozy Sweater and Scarf,Outerwear,girl,all,winter_festival_local
+Ethnic Silk Kurta,Ethnic Wear,boy,all_india,harvest_festival_celebration
+Embroidered Anarkali Suit,Ethnic Wear,girl,all_india,charity_gala_ethnic_theme
+Sundress,Western Wear,girl,all,summer_picnic_park
+Pea Coat,Outerwear,boy,cold_regions,winter_city_outing
+Pheran with Embroidery,Ethnic Wear,girl,kashmir,local_kashmiri_festival
+Santhali Saree,Ethnic Wear,girl,jharkhand,sohrai_festival
+ आदिवासी धोती कुर्ता,Ethnic Wear,boy,chhattisgarh,madai_festival
+Bodo Dokhona,Ethnic Wear,girl,assam,bohag_bihu_celebration
+Sherwani with Stole,Ethnic Wear,boy,north_india,cousins_wedding
+Lehenga Choli with Dupatta,Ethnic Wear,girl,rajasthan,destination_wedding
+Formal Jumpsuit,Western Wear,girl,metro_cities,farewell_party
+Crisp White Shirt and Dark Trousers,Formal Wear,boy,all,school_prefect_ceremony
+Silk Robe,Loungewear,girl,all,spa_day
+Pajama Set,Loungewear,boy,all,sleepover_party
+Football Jersey,Sportswear,boy,all,football_match_viewing
+Cheerleader Outfit,Sportswear,girl,all,cheerleading_practice
+Safari Suit,Travel Wear,boy,africa,safari_adventure
+Linen Dress,Travel Wear,girl,tropical_islands,island_getaway
+Cape Dress,Fusion Wear,girl,metro_cities,fashion_show_attendance
+Bandhgala with Jeans,Fusion Wear,boy,all_india,modern_festive_look
+Kedia Jacket with Jeans,Fusion Wear,boy,gujarat,urban_navratri_event
+Short Kurti with Jeans,Fusion Wear,girl,all_india,casual_ethnic_day
+Traditional Naga Shawl with Modern Outfit,Fusion Wear,boy,nagaland,hornbill_festival_contemporary
+Mekhela with Crop Top,Fusion Wear,girl,assam,modern_bihu_party
+Hanfu,Ethnic Wear,boy,china,mid_autumn_festival
+Qipao inspired dress,Fusion Wear,girl,all,east_asian_themed_party
+Yukata,Ethnic Wear,girl,japan,summer_matsuri
+Jinbei,Ethnic Wear,boy,japan,fireworks_festival
+Kaftan Tunic,Ethnic Wear,boy,morocco,iftar_party
+Takchita,Ethnic Wear,girl,morocco,wedding_guest
+Cowboy Hat and Shirt,Costume,boy,usa,country_themed_party
+Country Style Dress,Western Wear,girl,usa,barn_dance
+Graduation Gown and Cap,Ceremonial,boy,all,university_convocation
+Graduation Saree,Ethnic Wear,girl,all_india,college_graduation_ceremony
+Ritu Kala Samskaram Saree,Ethnic Wear,girl,south_india,ritu_kala_samskaram
+Veshti Sattai,Ethnic Wear,boy,tamil_nadu,thaipusam_festival
+Chokka and Lungi,Ethnic Wear,boy,odisha,ratha_jatra
+Sambalpuri Saree,Ethnic Wear,girl,odisha,nuakhai_festival
+Rignai and Risa,Ethnic Wear,girl,tripura,goria_puja
+Duti and Kamchwlwi Borok,Ethnic Wear,boy,tripura,kharchi_puja
