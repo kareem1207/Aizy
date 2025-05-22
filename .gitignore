@@ -2,3 +2,5 @@
 .vscode
 node_modules/
 dist/
+aizy_ai
+__pycache__/
