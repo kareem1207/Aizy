@@ -4,4 +4,4 @@ node_modules/
 dist/
 aizy_ai
 __pycache__/
-model_test/"python/models/fashion_assistant_model_created.pkl" 
+model_test/ 
