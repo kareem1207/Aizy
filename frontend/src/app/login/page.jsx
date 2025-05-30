@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useUserStore } from '@/store/userStore';
 import { useRouter } from 'next/navigation';
 import { OTP } from '@/components/OTP';
-import usersData from "../api/data/users.json";
 
 const Login = () => {
     const router = useRouter();
