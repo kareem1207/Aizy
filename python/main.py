@@ -126,30 +126,30 @@ if __name__ == "__main__":
     print("🚀 ECOMMERCE AI SYSTEM TESTING")
     print("="*60)
 
-    print("\n--- (OPTIONAL) TRAINING ADMIN AI ---")
+    # print("\n--- (OPTIONAL) TRAINING ADMIN AI ---")
     # ai.train_admin_ai(filepath=fake_accounts_filepath)
 
-    # print("\n--- TRAINING FASHION ASSISTANT ---")
-    # ai.train_fashion_assistant("./data/fashion.csv")
+    print("\n--- TRAINING FASHION ASSISTANT ---")
+    ai.train_fashion_assistant("./data/fashion.csv")
 
-    # print("\n--- FASHION STYLIST RECOMMENDATIONS ---")
-    # fashion_queries = [
-    #     "girl birthday party all",
-    #     "boy festival north_india ethnic wear",
-    #     "Suggest an outfit for a boy attending a college fest in Bangalore",
-    #     "Suggest an outfit for a girl for ramzan festival",
-    #     "Suggest an outfit for a boy for a wedding in Mumbai",
-    #     "I need a dress for a dasara, i am a girl",
-    #     "Suggest an outfit for a girl for a cristhmas party",
-    #     "I am a boy and i need to attend a client meeting in a corporate office",
-    #     "Suggest an outfit for a girl for attending a conference at Delhi",
-    #     "I have a party coming up on Sunday, i am a girl",
-    #     "I have a party coming up on Sunday, i am a boy",
-    #     "This is test to find boy dress"
-    # ]
+    print("\n--- FASHION STYLIST RECOMMENDATIONS ---")
+    fashion_queries = [
+        "girl birthday party all",
+        "boy festival north_india ethnic wear",
+        "Suggest an outfit for a boy attending a college fest in Bangalore",
+        "Suggest an outfit for a girl for ramzan festival",
+        "Suggest an outfit for a boy for a wedding in Mumbai",
+        "I need a dress for a dasara, i am a girl",
+        "Suggest an outfit for a girl for a cristhmas party",
+        "I am a boy and i need to attend a client meeting in a corporate office",
+        "Suggest an outfit for a girl for attending a conference at Delhi",
+        "I have a party coming up on Sunday, i am a girl",
+        "I have a party coming up on Sunday, i am a boy",
+        "This is test to find boy dress"
+    ]
     
-    # for query in fashion_queries:
-    #     print(ai.fashion_assistant(query))
+    for query in fashion_queries:
+        print(ai.fashion_assistant(query))
 
     print("\n--- ADVANCED SALES FORECASTING & PROFIT ANALYSIS ---")
     print("🔄 Training sales forecasting model...")
