@@ -33,7 +33,7 @@ export const Header = () => {
         };
     }, [user]); 
     return (
-        <div className="sticky top-0 z-50 bg-[#fffcf6] shadow-sm">
+        <div className="fixed top-0 z-50 bg-[#fffcf6] shadow-sm mt-8">
             <header className="container mx-auto">
                 <div className="flex items-center h-16 px-4 gap-6">
                     <Link href="/" className="flex-shrink-0">
@@ -45,19 +45,6 @@ export const Header = () => {
                             className="object-contain hover:opacity-90 transition-opacity"
                         />
                     </Link>
-
-                    <div className="md:flex flex-shrink-0">
-                        <Location />
-                    </div>
-
-                    <div className="md:flex flex-1 max-w-[600px]">
-                        <SearchBar />
-                    </div>
-
-                    <div className="md:flex flex-shrink-0">
-                        <Language />
-                    </div>
-
                     {!token && (
                         <div className="md:flex flex-shrink-0">
                             <Link href="/login" className="text-[#3c6ca8] hover:underline font-medium">
@@ -80,11 +67,6 @@ export const Header = () => {
                         </div>
                     )}
 
-                    <button className="md:hidden p-2 rounded-lg hover:bg-gray-100">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
                 </div>
             </header>
         </div>

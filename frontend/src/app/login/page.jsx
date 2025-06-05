@@ -86,186 +86,168 @@ const Login = () => {
 
     return (
         <>
-            <div className="min-h-screen flex items-center justify-center bg-[#fffcf6]">
-                <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-[#fffcf6]">
+            <div className="min-h-screen flex items-center justify-center bg-[#fffcf6] p-8">
+                <div className="w-full max-w-md">
+                    {/* Logo */}
                     <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-[#3c6ca8]">Aizy</h1>
-                        <p className="text-[#3c6ca8] mt-2">
-                            {isLogin ? 'Sign in to your account' : 'Create a new account'}
-                        </p>
+                        <h1 className="text-7xl font-black text-[#3c6ca8] tracking-wider" style={{ 
+                            fontFamily: 'Arial Black, Helvetica, sans-serif',
+                            fontWeight: '900',
+                            letterSpacing: '0.1em',
+                            textShadow: '2px 2px 4px rgba(60, 108, 168, 0.3)'
+                        }}>
+                            AIZY
+                        </h1>
                     </div>
                     
-                    <div className="flex mb-6">
-                        <button 
-                            onClick={() => { setIsLogin(true); setError(''); setSuccess(''); setShowOtpFirst(false); setVerifiedUser(false); }} 
-                            className={`flex-1 py-2 text-center ${isLogin ? 'text-[#3c6ca8] border-b-2 border-[#3c6ca8]' : 'text-[#3c6ca8]/50'}`}
-                        >
-                            Login
-                        </button>
-                        <button 
-                            onClick={() => { setIsLogin(false); setError(''); setSuccess(''); setShowOtpFirst(false); setVerifiedUser(false); }} 
-                            className={`flex-1 py-2 text-center ${!isLogin ? 'text-[#3c6ca8] border-b-2 border-[#3c6ca8]' : 'text-[#3c6ca8]/50'}`}
-                        >
-                            Sign Up
-                        </button>
-                    </div>
-                    
-                    {error && (
-                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                            {error}
-                        </div>
-                    )}
-                    
-                    {success && (
-                        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-                            {success}
-                        </div>
-                    )}
-                    
-                    {showOtpFirst ? (
-                        <div className="mb-6">
-                            <h2 className="text-lg font-semibold text-[#3c6ca8] mb-4">
-                                Verify Your Identity
-                            </h2>
-                            <OTP setUserValid={setIsValid} userInfo={formData} />
-                            <button
-                                onClick={() => setShowOtpFirst(false)}
-                                className="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-[#3c6ca8] py-2 rounded-lg transition duration-200"
+                    {/* Login Form */}
+                    <div className="bg-white/30 backdrop-blur-sm rounded-lg p-6 border border-[#3c6ca8]/20">
+                        {/* Login/Signup Toggle */}
+                        <div className="flex mb-6 bg-[#3c6ca8]/10 rounded-md p-1">
+                            <button 
+                                onClick={() => { setIsLogin(true); setError(''); setSuccess(''); setShowOtpFirst(false); setVerifiedUser(false); }} 
+                                className={`flex-1 py-2 px-4 rounded-sm text-center transition-all ${isLogin ? 'bg-[#3c6ca8] text-white' : 'text-[#3c6ca8]'}`}
                             >
-                                Back
+                                Login
                             </button>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit}>
-                            {!isLogin && (
-                                <div className="mb-4">
-                                    <label htmlFor="name" className="block text-[#3c6ca8] mb-2">Name</label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
-                                        required={!isLogin}
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                            )}
-                            
-                            <div className="mb-4">
-                                <label htmlFor="email" className="block text-[#3c6ca8] mb-2">Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                            
-                            <div className="mb-4">
-                                <label htmlFor="password" className="block text-[#3c6ca8] mb-2">Password</label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                            
-                            {!isLogin && (
-                                <div className="mb-4">
-                                    <label htmlFor="confirmPassword" className="block text-[#3c6ca8] mb-2">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]"
-                                        required={!isLogin}
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                            )}
-                            
-                            <div className="mb-4 relative">
-                                <label htmlFor="userType" className="block text-[#3c6ca8] mb-2">User Type</label>
-                                <select
-                                    id="userType"
-                                    name="userType"
-                                    value={formData.userType}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6] appearance-none"
-                                    required
-                                    disabled={isLoading}
-                                >
-                                    <option value="customer">Customer</option>
-                                    {isLogin && (<option value="admin">Admin</option>)}
-                                    <option value="seller">Seller</option>
-                                </select>
-                                <div className="pointer-events-none absolute right-0 top-1/2 mt-2 flex items-center px-2 text-[#3c6ca8]">
-                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            
-                            {isLogin && (
-                                <div className="flex justify-end mb-6">
-                                    <Link href="/forgot-password" className="text-sm text-[#3c6ca8] hover:underline">
-                                        Forgot password?
-                                    </Link>
-                                </div>
-                            )}
-                            
-                            <button
-                                type="submit"
-                                className={`w-full bg-[#3c6ca8] hover:bg-[#3c6ca8]/80 text-[#fffcf6] py-3 rounded-lg transition duration-200 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                                disabled={isLoading}
+                            <button 
+                                onClick={() => { setIsLogin(false); setError(''); setSuccess(''); setShowOtpFirst(false); setVerifiedUser(false); }} 
+                                className={`flex-1 py-2 px-4 rounded-sm text-center transition-all ${!isLogin ? 'bg-[#3c6ca8] text-white' : 'text-[#3c6ca8]'}`}
                             >
-                                {isLoading 
-                                    ? 'Processing...' 
-                                    : verifiedUser 
-                                        ? isLogin ? 'Login Now' : 'Create Account Now' 
-                                        : 'Proceed to Verification'
-                                }
+                                Sign Up
                             </button>
-                        </form>
-                    )}
-                    
-                    <div className="mt-8 text-center">
-                        <div className="relative flex items-center justify-center">
-                            <div className="border-t border-[#3c6ca8]/30 flex-grow"></div>
-                            <span className="px-4 text-sm text-[#3c6ca8]">Or continue with</span>
-                            <div className="border-t border-[#3c6ca8]/30 flex-grow"></div>
                         </div>
                         
-                        <div className="flex justify-center gap-4 mt-4">
-                            <button className="p-2 rounded-full border border-[#3c6ca8]/30 hover:bg-[#e8f0fe] text-[#3c6ca8]">
-                                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
-                                </svg>
-                            </button>
-                            <button className="p-2 rounded-full border border-[#3c6ca8]/30 hover:bg-[#e8f0fe] text-[#3c6ca8]">
-                                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M22.675 0H1.325C0.593 0 0 0.593 0 1.325v21.351C0 23.407 0.593 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463 0.099 2.795 0.143v3.24l-1.918 0.001c-1.504 0-1.795 0.715-1.795 1.763v2.313h3.587l-0.467 3.622h-3.12V24h6.116c0.73 0 1.323-0.593 1.323-1.325V1.325C24 0.593 23.407 0 22.675 0z" />
-                                </svg>
-                            </button>
-                            <button className="p-2 rounded-full border border-[#3c6ca8]/30 hover:bg-[#e8f0fe] text-[#3c6ca8]">
-                                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.493 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z" />
-                                </svg>
-                            </button>
-                        </div>
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                {error}
+                            </div>
+                        )}
+                        
+                        {success && (
+                            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                                {success}
+                            </div>
+                        )}
+                        
+                        {showOtpFirst ? (
+                            <div className="mb-6">
+                                <h2 className="text-lg font-semibold text-[#3c6ca8] mb-4">
+                                    Verify Your Identity
+                                </h2>
+                                <OTP setUserValid={setIsValid} userInfo={formData} />
+                                <button
+                                    onClick={() => setShowOtpFirst(false)}
+                                    className="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-[#3c6ca8] py-3 rounded-lg transition duration-200"
+                                >
+                                    Back
+                                </button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {!isLogin && (
+                                    <div>
+                                        <input
+                                            type="text"
+                                            id="name"
+                                            name="name"
+                                            placeholder="Name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
+                                            required={!isLogin}
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+                                )}
+                                
+                                <div>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
+                                        required
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        placeholder="Password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
+                                        required
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                                
+                                {!isLogin && (
+                                    <div>
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            placeholder="Confirm Password"
+                                            value={formData.confirmPassword}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
+                                            required={!isLogin}
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+                                )}
+                                
+                                <div className="relative">
+                                    <select
+                                        id="userType"
+                                        name="userType"
+                                        value={formData.userType}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 appearance-none"
+                                        required
+                                        disabled={isLoading}
+                                    >
+                                        <option value="customer">Customer</option>
+                                        {isLogin && <option value="admin">Admin</option>}
+                                        <option value="seller">Seller</option>
+                                    </select>
+                                    <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 text-[#3c6ca8]">
+                                        <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                {isLogin && (
+                                    <div className="flex justify-end">
+                                        <Link href="/forgot-password" className="text-sm text-[#3c6ca8] hover:underline">
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+                                )}
+                                
+                                <button
+                                    type="submit"
+                                    className={`w-full bg-[#3c6ca8] hover:bg-[#3c6ca8]/90 text-white py-3 rounded-md transition duration-200 font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading 
+                                        ? 'Processing...' 
+                                        : verifiedUser 
+                                            ? isLogin ? 'Login Now' : 'Create Account Now' 
+                                            : 'Proceed'
+                                    }
+                                </button>
+                            </form>
+                        )}
                     </div>
                 </div>
             </div>

@@ -2,77 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from "@/components/Card"; 
-import { motion, AnimatePresence } from "framer-motion";
 import { useProductStore } from "@/store/productStore";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.3,
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
-
-const titleVariants = {
-  hidden: { y: -100, opacity: 0 },
-  show: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15,
-      duration: 0.8
-    }
-  }
-};
-
-const backgroundVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      duration: 1.5,
-      ease: "easeOut"
-    }
-  }
-};
-
-const textVariants = {
-  hidden: { x: -50, opacity: 0 },
-  show: {
-    x: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 12,
-      duration: 0.8
-    }
-  }
-};
-
-const loadingVariants = {
-  hidden: { scale: 0.8, opacity: 0 },
-  show: {
-    scale: 1,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
+import { useUserStore } from "@/store/userStore";
 
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState([]);
+  const [isVisible, setIsVisible] = useState(false);
   const { getProducts } = useProductStore();
+  const { user } = useUserStore();
 
   useEffect(() => {
     const loadData = async () => {
@@ -88,76 +26,57 @@ const Home = () => {
     };
 
     loadData();
+    
+    // Trigger animations after component mounts
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [getProducts]);
   
-  console.log(products);
-
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key="home-container"
-        initial="hidden"
-        animate="show"
-        exit="hidden"
-        variants={backgroundVariants}
-        className="min-h-screen  bg-[#fffcf6] to-blue-50 py-16 overflow-hidden"
-      >
-        <motion.div
-          variants={containerVariants}
-          className="container mx-auto px-4 mb-12 text-center"
-        >
-          <motion.h1 
-            variants={titleVariants}
-            className="text-4xl md:text-5xl font-bold text-gray-900 mb-4"
-          >
-            Welcome to{" "}
-            <motion.span
-              className="text-[] inline-block"
-              whileHover={{ 
-                scale: 1.1,
-                color: "#4F46E5",
-                transition: { duration: 0.2 }
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Aizy
-            </motion.span>
-          </motion.h1>
-          <motion.p
-            variants={textVariants}
-            className="text-lg text-gray-600 max-w-2xl mx-auto"
-          >
-            Discover our amazing collection of products curated just for you
-          </motion.p>
-        </motion.div>
+    <div className={`min-h-screen bg-[#fffcf6] py-8 overflow-hidden transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Hero Section */}
+      <div className="container mx-auto px-8 mb-8">
+        <div className={`max-w-6xl mx-auto transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-24 opacity-0'} flex justify-between items-center`}>
+          <div className="text-left">
+            <h1 className="text-7xl md:text-6xl text-[#3c6ca8] leading-tight">
+              Less effort,
+              <br />
+              More elegance.
+            </h1>
+            <p className={`text-7xl md:text-3xl font-semibold text-[#3c6ca8] leading-tight transform transition-all duration-1000 delay-500 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-12 opacity-0'}`}>
+              Powered by{" "}
+              <span className="inline-block hover:scale-105 transition-transform duration-200">
+                AI Magic.
+              </span>
+            </p>
+          </div>
+          
+          {/* AI Chat Button - Always visible and positioned on the right */}
+          <div className={`transform transition-all duration-1000 delay-700 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'}`}>
+            <button className="bg-[#3c6ca8] text-[#fffcf6] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#3c6ca8]/90 hover:scale-105 hover:shadow-lg hover:shadow-[#3c6ca8]/30 active:scale-95 transition-all duration-200 shadow-lg border-2 border-[#3c6ca8]">
+              Chat
+            </button>
+          </div>
+        </div>
+      </div>
 
-        <motion.div
-          variants={containerVariants}
-          className="container mx-auto px-4"
-        >
-          {isLoading ? (
-            <motion.div
-              variants={loadingVariants}
-              className="flex justify-center items-center h-64"
-            >
-              <motion.div
-                className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full"
-                animate={{
-                  rotate: 360
-                }}
-                transition={{
-                  duration: 1,
-                  ease: "linear",
-                  repeat: Infinity
-                }}
-              />
-            </motion.div>
-          ) : (
+      {/* Products Section */}
+      <div className="container mx-auto px-8">
+        
+        {isLoading ? (
+          <div className={`flex justify-center items-center h-64 transform transition-all duration-500 ${isVisible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}>
+            <div className="w-16 h-16 border-4 border-[#3c6ca8] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className={`transition-all duration-1000 delay-1200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <Card card={products} />
-          )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
