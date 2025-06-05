@@ -1,6 +1,8 @@
 import pandas as pd
 import joblib
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend to avoid threading issues
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from statsmodels.tsa.arima.model import ARIMA
@@ -203,6 +205,9 @@ class Models:
             return False
             
         try:
+            # Set matplotlib to use Agg backend to avoid GUI issues
+            plt.switch_backend('Agg')
+            
             sales_f = forecasting_results['sales_forecasts']
             profit_f = forecasting_results['profit_forecasts'] 
             hist_perf = forecasting_results['historical_performance']
@@ -298,7 +303,7 @@ class Models:
             
             self._plot_individual_forecast(best_product, forecasting_results['sales_data'], forecasting_results['profit_data'])
             
-            plt.close()  
+            plt.close('all')  # Close all figures to free memory
             return True
             
         except Exception as e:
@@ -310,7 +315,10 @@ class Models:
     def _plot_individual_forecast(self, product_name : str, sales_data, profit_data):
         if product_name not in sales_data.columns:
             return
+            
+        plt.switch_backend('Agg')  # Ensure Agg backend
         plt.figure(figsize=(12, 8))
+        
         historical_sales = sales_data[product_name]
         historical_profit = profit_data[product_name] if product_name in profit_data.columns else historical_sales * 0.2
         plt.subplot(2, 1, 1)
@@ -330,4 +338,4 @@ class Models:
         safe_filename = product_name.replace(' ', '_').replace('/', '_')
         plt.savefig(f'plots/{safe_filename}_detailed_analysis.png', dpi=300, bbox_inches='tight')
         print(f"✅ Detailed analysis for {product_name} saved as 'plots/{safe_filename}_detailed_analysis.png'")
-        plt.close() 
+        plt.close('all')  # Close all figures

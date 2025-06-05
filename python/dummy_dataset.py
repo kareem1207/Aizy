@@ -9,18 +9,18 @@ class Dummy_Dataset:
         pass
 
     def _create_dummy_fashion_data(self, filepath):
-        categories = ['shirt', 'dress', 'jeans', 'saree', 'kurta', 'tshirt', 'skirt']
-        genders = ['male', 'female', 'unisex']
-        regions = ['north_india', 'south_india', 'west_india', 'east_india']
-        occasions = ['casual', 'formal', 'party', 'wedding', 'festival', 'office']
+        categories = ['Shirts', 'Dresses', 'Jeans', 'Shoes', 'Accessories', 'Jackets', 'Skirts', 'Bags']
+        genders = ['Male', 'Female', 'Unisex']
+        regions = ['North', 'South', 'East', 'West', 'Central']
+        occasions = ['Casual', 'Formal', 'Party', 'Wedding', 'Office', 'Sports', 'Beach']
         
         dummy_data = []
-        for i in range(100):
+        for i in range(200):
             category = np.random.choice(categories)
             gender = np.random.choice(genders)
             region = np.random.choice(regions)
             occasion = np.random.choice(occasions)
-            product_name = f"{category}_{gender}_{occasion}_{i%20}"
+            product_name = f"{gender} {category} for {occasion}"
             
             dummy_data.append({
                 'category': category,
@@ -35,24 +35,31 @@ class Dummy_Dataset:
         print(f"✅ Dummy fashion data created at '{filepath}'")
 
     def _create_dummy_sales_data(self, filepath):
-        products = ['iPhone 13', 'Samsung Galaxy S22', 'MacBook Air', 'Dell Laptop', 
-                    'Nike Shoes', 'Adidas T-Shirt', 'Sony Headphones', 'Canon Camera']
+        products = [
+            'Summer Dress', 'Winter Jacket', 'Running Shoes', 'Casual Shirt',
+            'Formal Pants', 'Handbag', 'Sunglasses', 'Watch', 'Sneakers',
+            'T-Shirt', 'Jeans', 'Blazer', 'Sandals', 'Backpack', 'Scarf'
+        ]
         
+        # Create 12 months of data
         start_date = datetime.now() - timedelta(days=365)
-        dates = pd.date_range(start=start_date, periods=100, freq='D')
-        
         dummy_data = []
-        for date in dates:
-            for _ in range(np.random.randint(1, 5)):  
-                product = np.random.choice(products)
-                sales = np.random.uniform(100, 2000)
-                profit = sales * np.random.uniform(0.1, 0.3)  
+        
+        for i in range(365):
+            current_date = start_date + timedelta(days=i)
+            for product in products:
+                # Simulate seasonal trends
+                base_sales = random.randint(100, 1000)
+                seasonal_factor = 1 + 0.3 * np.sin(2 * np.pi * i / 365)
+                
+                sales = int(base_sales * seasonal_factor)
+                profit = sales * random.uniform(0.15, 0.35)  # 15-35% profit margin
                 
                 dummy_data.append({
-                    'Order Date': date.strftime('%d/%m/%Y'),
-                    'Product Name': product,
-                    'Sales': round(sales, 2),
-                    'Profit': round(profit, 2)
+                    'date': current_date.strftime('%Y-%m-%d'),
+                    'product_name': product,
+                    'sales': sales,
+                    'profit': round(profit, 2)
                 })
         
         os.makedirs(os.path.dirname(filepath), exist_ok=True)

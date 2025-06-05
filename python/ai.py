@@ -10,11 +10,11 @@ warnings.filterwarnings("ignore")
 
 class EcommerceAI:
     def __init__(self):
-        self.admin_model = None
+        print("🤖 Initializing EcommerceAI...")
+        self.models = Models()
         self.fashion_model = None
-        self.sales_forecasting_data = None
-        self.profit_data = None
-        self.models_creator = Models()
+        self.sales_model = None
+        print("✅ EcommerceAI initialized")
 
     # ----------- ADMIN AI: Fake Account Detection(not implemented) -----------
     def train_admin_ai(self, filepath: str="fake_accounts.csv"):
@@ -23,85 +23,89 @@ class EcommerceAI:
 
     # ----------- CUSTOMER AI: Fashion Assistant -----------
     def train_fashion_assistant(self, filepath:str="fashion.csv"):
-        self.fashion_model = self.models_creator.create_fashion_model(filepath)
-        if self.fashion_model:
-            print("✅ Fashion Assistant AI ready.")
-        else:
-            print("⚠️ Fashion Assistant AI could not be initialized.")
+        """Train the fashion assistant model"""
+        try:
+            print(f"👗 Training fashion assistant with data from {filepath}")
+            self.fashion_model = self.models.create_fashion_model(filepath)
+            if self.fashion_model:
+                print("✅ Fashion Assistant AI ready.")
+                return True
+            else:
+                print("❌ Fashion Assistant training failed.")
+                return False
+        except Exception as e:
+            print(f"❌ Error training fashion assistant: {e}")
+            return False
 
     def fashion_assistant(self, prompt:str):
-        if not self.fashion_model:
-            try:
-                self.fashion_model = joblib.load("models/fashion_assistant_model_created.pkl")
-                print("✅ Loaded pre-existing Fashion Assistant Model.")
-            except:
-                return "\n⚠️ Fashion Assistant model not trained. Call `train_fashion_assistant()` first."
-        
-        print(f"\n🔍 Fashion Assistant received prompt: \"{prompt}\"")
+        """Get fashion recommendations"""
         try:
-            prediction = self.fashion_model.predict([prompt])
-            if len(prediction) > 0:
-                response = prediction[0]
-                return f"\n✨ Fashion Advice:\n   For '{prompt}', we recommend: **{response}**"
-            else:
-                return "\n⚠️ Could not generate fashion advice for this query."
+            if self.fashion_model is None:
+                print("⚠️ Fashion model not trained, training now...")
+                self.train_fashion_assistant("./data/fashion.csv")
+            
+            if self.fashion_model is None:
+                return "Fashion assistant is not available. Please train the model first."
+            
+            # Simple recommendation based on the prompt
+            predictions = self.fashion_model.predict([prompt])
+            return f"Based on your request '{prompt}', I recommend: {predictions[0]}"
         except Exception as e:
-            return f"\n⚠️ Error generating fashion advice: {e}"
+            print(f"❌ Error in fashion assistant: {e}")
+            return f"Sorry, I couldn't process your request: {str(e)}"
 
     # ----------- SELLER AI: Enhanced Sales Forecasting & Profit Analysis -----------
     def train_sales_forecaster(self, filepath:str="products.csv", months_to_forecast:int=3):
-        self.forecasting_results = self.models_creator.create_sales_forecasting_model(
-            filepath=filepath,
-            months_to_forecast=months_to_forecast
-        )
-        
-        if self.forecasting_results:
-            self.models_creator.create_forecast_visualizations(self.forecasting_results)
-            print("✅ Sales Forecaster AI ready.")
-            return True
-        else:
-            print("⚠️ Sales Forecaster AI could not be initialized.")
+        """Train the sales forecasting model"""
+        try:
+            print(f"📈 Training sales forecaster with data from {filepath}")
+            self.sales_model = self.models.create_sales_forecasting_model(filepath, months_to_forecast)
+            if self.sales_model:
+                # Generate visualizations
+                self.models.create_forecast_visualizations(self.sales_model)
+                print("✅ Sales Forecaster AI ready.")
+                return True
+            else:
+                print("❌ Sales Forecaster training failed.")
+                return False
+        except Exception as e:
+            print(f"❌ Error training sales forecaster: {e}")
             return False
 
     def sales_forecaster(self):
-        if not hasattr(self, 'forecasting_results') or self.forecasting_results is None:
-            try:
-                self.forecasting_results = joblib.load("models/sales_forecasting_model.pkl")
-                print("✅ Loaded pre-existing Sales Forecasting Model.")
-            except:
-                return "\n⚠️ No existing forecasting model found. Please train the model first by calling train_sales_forecaster()"
-        
-        if not self.forecasting_results:
-            return "\n⚠️ Sales forecasting model contains no data. Please check your data file and retrain."
-        
+        """Get sales forecasting results"""
         try:
-            best_overall_product = self.forecasting_results['best_overall_product']
-            best_profit_product = self.forecasting_results['best_profit_product']
-            best_sales_product = self.forecasting_results['best_sales_product']
+            print("📊 Generating sales forecast...")
             
-            profit_forecasts = self.forecasting_results['profit_forecasts']
-            sales_forecasts = self.forecasting_results['sales_forecasts']
-            profitability_scores = self.forecasting_results['profitability_scores']
+            if self.sales_model is None:
+                print("⚠️ Sales model not trained, training now...")
+                if not self.train_sales_forecaster("./data/products.csv"):
+                    raise Exception("Failed to train sales model")
             
-            response = f"\n📊 SALES FORECASTING RESULTS\n{'='*50}\n"
-            response += f"🏆 Best Product for SALES Volume: **{best_sales_product}**\n"
-            response += f"   Forecasted Sales: ${sales_forecasts[best_sales_product]:,.2f}\n\n"
+            # Ensure the sales model is available before proceeding
+            if self.sales_model is None:
+                # This state implies an issue with the training logic if it was attempted,
+                # as train_sales_forecaster should ensure the model is set if it returns True.
+                raise Exception("Sales model is unexpectedly None prior to forecasting.")
+
+            # Return the forecast results
+            forecast_data = self.sales_model.copy()
             
-            response += f"💰 Best Product for PROFIT: **{best_profit_product}**\n"
-            response += f"   Forecasted Profit: ${profit_forecasts[best_profit_product]:,.2f}\n\n"
+            # Remove large data objects to avoid serialization issues
+            if 'sales_data' in forecast_data:
+                del forecast_data['sales_data']
+            if 'profit_data' in forecast_data:
+                del forecast_data['profit_data']
+                
+            print("✅ Sales forecast generated successfully")
+            return forecast_data
             
-            response += f"🎯 RECOMMENDED Product (Overall Best): **{best_overall_product}**\n"
-            response += f"   Forecasted Profit: ${profit_forecasts[best_overall_product]:,.2f}\n"
-            response += f"   Profitability Score: {profitability_scores[best_overall_product]:,.2f}\n\n"
-            
-            response += f"📁 Generated Analysis Files:\n"
-            response += f"   • Comprehensive analysis: plots/comprehensive_seller_analysis.png\n"
-            response += f"   • Detailed product analysis: plots/{best_overall_product.replace(' ', '_').replace('/', '_')}_detailed_analysis.png"
-            
-            return response
         except Exception as e:
-            return f"\n⚠️ Error generating sales forecast: {str(e)}"
-    
+            print(f"❌ Error in sales forecaster: {e}")
+            import traceback
+            traceback.print_exc()
+            raise Exception(f"Sales forecasting failed: {str(e)}")
+
 if __name__ == "__main__":
     ai = EcommerceAI()
     # Optional, you can delete it but recommended to keep it
