@@ -33,9 +33,9 @@ export const Header = () => {
         };
     }, [user]); 
     return (
-        <div className="fixed top-0 z-50 bg-[#fffcf6] shadow-sm mt-8">
+        <div className="sticky top-0 z-50 bg-[#fffcf6] shadow-sm mt-8">
             <header className="container mx-auto">
-                <div className="flex items-center h-16 px-4 gap-6">
+                <div className="flex items-center justify-between h-16 px-4 gap-6">
                     <Link href="/" className="flex-shrink-0">
                         <Image 
                             src="/logo.jpg" 
@@ -45,28 +45,30 @@ export const Header = () => {
                             className="object-contain hover:opacity-90 transition-opacity"
                         />
                     </Link>
-                    {!token && (
-                        <div className="md:flex flex-shrink-0">
-                            <Link href="/login" className="text-[#3c6ca8] hover:underline font-medium">
-                                Login 
-                            </Link>
-                        </div>
-                    )}
+                    
+                    <div className="flex items-center gap-4">
+                        {!token && (
+                            <div className="flex-shrink-0">
+                                <Link href="/login" className="text-[#3c6ca8] hover:underline font-medium">
+                                    Login 
+                                </Link>
+                            </div>
+                        )}
 
-                    {token && (
-                        <div className="md:flex flex-shrink-0">
-                            <Link 
-                                href="/user" 
-                                className="text-[#3c6ca8] hover:underline font-medium"
-                                onClick={(e) => {
-                                    console.log("Account link clicked, navigating to /user");
-                                }}
-                            >
-                                Account 
-                            </Link>
-                        </div>
-                    )}
-
+                        {token && (
+                            <div className="flex-shrink-0">
+                                <Link 
+                                    href="/user" 
+                                    className="text-[#3c6ca8] hover:underline font-medium"
+                                    onClick={(e) => {
+                                        console.log("Account link clicked, navigating to /user");
+                                    }}
+                                >
+                                    Account 
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
         </div>

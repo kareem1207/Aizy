@@ -1,168 +1,139 @@
-# import pandas as pd
-import joblib
-# import numpy as np
-# import os
-import warnings
-from model import Models
-from pathlib import Path
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from ai import EcommerceAI
+import os
+from typing import Optional
 
-warnings.filterwarnings("ignore")
+app = FastAPI(title="Ecommerce AI API", version="1.0.0")
 
-class EcommerceAI:
-    def __init__(self):
-        self.admin_model = None
-        self.fashion_model = None
-        self.sales_forecasting_data = None
-        self.profit_data = None
-        self.models_creator = Models()
+# CORS middleware for Next.js frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Next.js default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    # ----------- ADMIN AI: Fake Account Detection(not implemented) -----------
-    def train_admin_ai(self, filepath: str="fake_accounts.csv"):
-        #? Not implemented
-        pass
+# Initialize AI instance
+ai_instance = EcommerceAI()
 
-    # ----------- CUSTOMER AI: Fashion Assistant -----------
-    def train_fashion_assistant(self, filepath:str="fashion.csv"):
-        self.fashion_model = self.models_creator.create_fashion_model(filepath)
-        if self.fashion_model:
-            print("✅ Fashion Assistant AI ready.")
-        else:
-            print("⚠️ Fashion Assistant AI could not be initialized.")
+# Pydantic models for request/response
+class FashionQuery(BaseModel):
+    prompt: str
 
-    def fashion_assistant(self, prompt:str):
-        if not self.fashion_model:
-            try:
-                self.fashion_model = joblib.load("models/fashion_assistant_model_created.pkl")
-                print("✅ Loaded pre-existing Fashion Assistant Model.")
-            except:
-                return "\n⚠️ Fashion Assistant model not trained. Call `train_fashion_assistant()` first."
+class TrainingRequest(BaseModel):
+    filepath: Optional[str] = None
+    months_to_forecast: Optional[int] = 3
+
+class AIResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[dict] = None
+
+# Initialize AI models on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize AI models when the API starts"""
+    try:
+        # Create directories if they don't exist
+        os.makedirs("data", exist_ok=True)
+        os.makedirs("plots", exist_ok=True)
+        os.makedirs("models", exist_ok=True)
         
-        print(f"\n🔍 Fashion Assistant received prompt: \"{prompt}\"")
-        try:
-            prediction = self.fashion_model.predict([prompt])
-            if len(prediction) > 0:
-                response = prediction[0]
-                return f"\n✨ Fashion Advice:\n   For '{prompt}', we recommend: **{response}**"
-            else:
-                return "\n⚠️ Could not generate fashion advice for this query."
-        except Exception as e:
-            return f"\n⚠️ Error generating fashion advice: {e}"
+        # Try to load existing models or train new ones
+        print("🚀 Initializing AI models...")
+        
+        # Fashion Assistant
+        ai_instance.train_fashion_assistant("./data/fashion.csv")
+        
+        # Sales Forecaster (if data exists)
+        if os.path.exists("./data/products.csv"):
+            ai_instance.train_sales_forecaster("./data/products.csv")
+            
+        print("✅ AI models initialized successfully")
+    except Exception as e:
+        print(f"⚠️ Error during startup: {e}")
 
-    # ----------- SELLER AI: Enhanced Sales Forecasting & Profit Analysis -----------
-    def train_sales_forecaster(self, filepath:str="products.csv", months_to_forecast:int=3):
-        self.forecasting_results = self.models_creator.create_sales_forecasting_model(
-            filepath=filepath,
-            months_to_forecast=months_to_forecast
+@app.get("/")
+def read_root():
+    return {"message": "Ecommerce AI API is running", "status": "active"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "ai_ready": True}
+
+# Fashion Assistant Endpoints
+@app.post("/ai/fashion/query", response_model=AIResponse)
+async def fashion_query(query: FashionQuery):
+    """Get fashion recommendations from AI"""
+    try:
+        result = ai_instance.fashion_assistant(query.prompt)
+        return AIResponse(
+            success=True,
+            message="Fashion recommendation generated",
+            data={"recommendation": result}
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting fashion advice: {str(e)}")
+
+@app.post("/ai/fashion/train", response_model=AIResponse)
+async def train_fashion_model(request: TrainingRequest):
+    """Train or retrain the fashion assistant model"""
+    try:
+        filepath = request.filepath or "./data/fashion.csv"
+        ai_instance.train_fashion_assistant(filepath)
+        return AIResponse(
+            success=True,
+            message="Fashion assistant model trained successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error training fashion model: {str(e)}")
+
+# Sales Forecasting Endpoints
+@app.post("/ai/sales/forecast", response_model=AIResponse)
+async def get_sales_forecast():
+    """Get sales forecasting results"""
+    try:
+        result = ai_instance.sales_forecaster()
+        return AIResponse(
+            success=True,
+            message="Sales forecast generated",
+            data={"forecast": result}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting sales forecast: {str(e)}")
+
+@app.post("/ai/sales/train", response_model=AIResponse)
+async def train_sales_model(request: TrainingRequest):
+    """Train or retrain the sales forecasting model"""
+    try:
+        filepath = request.filepath or "./data/products.csv"
+        months = request.months_to_forecast or 3
         
-        if self.forecasting_results:
-            self.models_creator.create_forecast_visualizations(self.forecasting_results)
-            print("✅ Sales Forecaster AI ready.")
-            return True
+        success = ai_instance.train_sales_forecaster(filepath, months)
+        if success:
+            return AIResponse(
+                success=True,
+                message="Sales forecasting model trained successfully"
+            )
         else:
-            print("⚠️ Sales Forecaster AI could not be initialized.")
-            return False
+            raise HTTPException(status_code=400, detail="Failed to train sales model")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error training sales model: {str(e)}")
 
-    def sales_forecaster(self):
-        if not hasattr(self, 'forecasting_results') or self.forecasting_results is None:
-            try:
-                self.forecasting_results = joblib.load("models/sales_forecasting_model.pkl")
-                print("✅ Loaded pre-existing Sales Forecasting Model.")
-            except:
-                return "\n⚠️ No existing forecasting model found. Please train the model first by calling train_sales_forecaster()"
-        
-        if not self.forecasting_results:
-            return "\n⚠️ Sales forecasting model contains no data. Please check your data file and retrain."
-        
-        try:
-            best_overall_product = self.forecasting_results['best_overall_product']
-            best_profit_product = self.forecasting_results['best_profit_product']
-            best_sales_product = self.forecasting_results['best_sales_product']
-            
-            profit_forecasts = self.forecasting_results['profit_forecasts']
-            sales_forecasts = self.forecasting_results['sales_forecasts']
-            profitability_scores = self.forecasting_results['profitability_scores']
-            
-            response = f"\n📊 SALES FORECASTING RESULTS\n{'='*50}\n"
-            response += f"🏆 Best Product for SALES Volume: **{best_sales_product}**\n"
-            response += f"   Forecasted Sales: ${sales_forecasts[best_sales_product]:,.2f}\n\n"
-            
-            response += f"💰 Best Product for PROFIT: **{best_profit_product}**\n"
-            response += f"   Forecasted Profit: ${profit_forecasts[best_profit_product]:,.2f}\n\n"
-            
-            response += f"🎯 RECOMMENDED Product (Overall Best): **{best_overall_product}**\n"
-            response += f"   Forecasted Profit: ${profit_forecasts[best_overall_product]:,.2f}\n"
-            response += f"   Profitability Score: {profitability_scores[best_overall_product]:,.2f}\n\n"
-            
-            response += f"📁 Generated Analysis Files:\n"
-            response += f"   • Comprehensive analysis: plots/comprehensive_seller_analysis.png\n"
-            response += f"   • Detailed product analysis: plots/{best_overall_product.replace(' ', '_').replace('/', '_')}_detailed_analysis.png"
-            
-            return response
-        except Exception as e:
-            return f"\n⚠️ Error generating sales forecast: {str(e)}"
-    
+# Admin AI Endpoints (placeholder for future implementation)
+@app.post("/ai/admin/train", response_model=AIResponse)
+async def train_admin_model(request: TrainingRequest):
+    """Train admin AI model (fake account detection)"""
+    try:
+        filepath = request.filepath or "./data/fake_accounts.csv"
+        ai_instance.train_admin_ai(filepath)
+        return AIResponse(success=True, message="Admin AI model training initiated")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error training admin model: {str(e)}")
+
 if __name__ == "__main__":
-    ai = EcommerceAI()
-    # Optional, you can delete it but recommended to keep it
-    # os.makedirs("data", exist_ok=True)
-    # os.makedirs("plots", exist_ok=True)
-    
-    # fake_accounts_filepath = "data/fake_accounts.csv"
-    # if not os.path.exists(fake_accounts_filepath):
-    #     print(f"Creating dummy file for Admin AI testing at {fake_accounts_filepath}")
-    #     dummy_admin_data = {
-    #         'followers_count': np.random.randint(0, 1000, 100),
-    #         'friends_count': np.random.randint(0, 500, 100),
-    #         'posts_count': np.random.randint(0, 200, 100),
-    #         'has_profile_pic': np.random.randint(0, 2, 100),
-    #         'name_length': np.random.randint(3, 15, 100),
-    #         'label': np.random.randint(0, 2, 100)
-    #     }
-    #     pd.DataFrame(dummy_admin_data).to_csv(fake_accounts_filepath, index=False)
-    #     print(f"✅ Dummy {fake_accounts_filepath} created.")
-
-    print("\n" + "="*60)
-    print("🚀 ECOMMERCE AI SYSTEM TESTING")
-    print("="*60)
-
-    # print("\n--- (OPTIONAL) TRAINING ADMIN AI ---")
-    # ai.train_admin_ai(filepath=fake_accounts_filepath)
-
-    print("\n--- TRAINING FASHION ASSISTANT ---")
-    ai.train_fashion_assistant("./data/fashion.csv")
-
-    print("\n--- FASHION STYLIST RECOMMENDATIONS ---")
-    fashion_queries = [
-        "girl birthday party all",
-        "boy festival north_india ethnic wear",
-        "Suggest an outfit for a boy attending a college fest in Bangalore",
-        "Suggest an outfit for a girl for ramzan festival",
-        "Suggest an outfit for a boy for a wedding in Mumbai",
-        "I need a dress for a dasara, i am a girl",
-        "Suggest an outfit for a girl for a cristhmas party",
-        "I am a boy and i need to attend a client meeting in a corporate office",
-        "Suggest an outfit for a girl for attending a conference at Delhi",
-        "I have a party coming up on Sunday, i am a girl",
-        "I have a party coming up on Sunday, i am a boy",
-        "This is test to find boy dress"
-    ]
-    
-    for query in fashion_queries:
-        print(ai.fashion_assistant(query))
-
-    print("\n--- ADVANCED SALES FORECASTING & PROFIT ANALYSIS ---")
-    print("🔄 Training sales forecasting model...")
-    
-    ai.train_sales_forecaster("./data/products.csv", months_to_forecast=12)
-    
-    forecast_results = ai.sales_forecaster()
-    
-    if forecast_results:
-        print(forecast_results)
-    else:
-        print("❌ Could not generate seller recommendations. Check your data files.")
-    
-    print(f"\n" + "="*60)
-    print("✅ ECOMMERCE AI SYSTEM TEST COMPLETED")
-    print("="*60)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
