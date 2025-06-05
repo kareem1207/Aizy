@@ -1,8 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Language } from "@/components/Language";
-import { Location } from "@/components/Location";
-import { SearchBar } from "@/components/SearchBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useUserStore } from "@/store/userStore";
@@ -32,6 +29,7 @@ export const Header = () => {
             window.removeEventListener("storage", handleStorageChange);
         };
     }, [user]); 
+
     return (
         <div className="sticky top-0 z-50 bg-[#fffcf6] shadow-sm mt-8">
             <header className="container mx-auto">
