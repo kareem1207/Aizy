@@ -13,7 +13,6 @@ export const SearchBar = ({ onSearch, placeholder = "Search for products, brands
     const handleInputChange = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
-        // Real-time search as user types
         if (onSearch && typeof onSearch === 'function') {
             onSearch(query);
         }

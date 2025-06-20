@@ -1,0 +1,128 @@
+<mxfile host="65bd71144e">
+    <diagram name="Aizy System Architecture" id="system-architecture">
+        <mxGraphModel dx="2248" dy="585" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="frontend-layer" value="Frontend Layer (Next.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="50" width="300" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="react-components" value="React Components&#xa;- Dashboard&#xa;- Fashion Query&#xa;- Sales Analytics&#xa;- User Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="130" width="130" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="zustand-store" value="Zustand Store&#xa;- Global State&#xa;- User State&#xa;- API State" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="130" width="110" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="backend-layer" target="ai-layer">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="backend-layer" target="6">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="600" y="210"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="backend-layer" value="Backend Layer (Express.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="50" width="300" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="auth-routes" value="Auth Routes&#xa;- User Registration&#xa;- Login/Logout&#xa;- JWT Tokens" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="130" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="product-routes" value="Product Routes&#xa;- CRUD Operations&#xa;- File Upload&#xa;- Data Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="610" y="130" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="ai-layer" value="AI API Layer (FastAPI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="850" y="50" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="fashion-ai" value="Fashion Assistant&#xa;- NLP Processing&#xa;- Recommendations&#xa;- Model Training" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                    <mxGeometry x="870" y="130" width="100" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="sales-ai" value="Sales Forecaster&#xa;- Time Series&#xa;- Predictions&#xa;- Analytics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                    <mxGeometry x="990" y="130" width="100" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="mongodb" value="MongoDB&lt;br&gt;- Products&lt;br&gt;- Sessions" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="300" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="file-system" value="File System&#xa;- CSV Data&#xa;- ML Models&#xa;- Plot Images" style="shape=folder;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="300" width="100" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="api-endpoints" value="API Endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="450" width="400" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="frontend-apis" value="Frontend → Backend&#xa;- /auth/register&#xa;- /auth/login&#xa;- /api/products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="500" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="ai-apis" value="Frontend → AI API&#xa;- /ai/fashion/query&#xa;- /ai/sales/forecast&#xa;- /ai/sales/train" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="650" y="500" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="data-flow" value="Data Flow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="650" width="1050" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-1" value="1. User Interaction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="700" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-2" value="2. Frontend Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="700" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-3" value="3. API Routing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="700" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-4" value="4. Data Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="700" width="110" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-5" value="5. AI Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="700" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-6" value="6. Response Generation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="700" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-7" value="7. UI Update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                    <mxGeometry x="850" y="700" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="conn1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="frontend-layer" target="backend-layer" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="conn3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="backend-layer" target="mongodb" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="conn4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="ai-layer" target="file-system" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF6600;strokeWidth=2;" parent="1" source="flow-1" target="flow-2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF6600;strokeWidth=2;" parent="1" source="flow-2" target="flow-3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF6600;strokeWidth=2;" parent="1" source="flow-3" target="flow-4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF6600;strokeWidth=2;" parent="1" source="flow-4" target="flow-5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF6600;strokeWidth=2;" parent="1" source="flow-5" target="flow-6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="flow-arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FF6600;strokeWidth=2;" parent="1" source="flow-6" target="flow-7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ports" value="Ports &amp; Services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="370" width="300" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="port-info" value="Frontend: :3000 (Next.js)&#xa;Backend: :5000 (Express)&#xa;AI API: :8000 (FastAPI)&#xa;MongoDB: :27017" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#666666;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="410" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="MySql&lt;br&gt;- Users&lt;br&gt;- Sessions" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="465" y="300" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="6" target="2">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;Prisma ORM&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;protecting the MYSql database&lt;/font&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0050ef;fontColor=#ffffff;strokeColor=#001DBC;" vertex="1" parent="1">
+                    <mxGeometry x="452.5" y="240" width="105" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

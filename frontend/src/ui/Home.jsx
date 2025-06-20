@@ -34,7 +34,6 @@ const Home = () => {
     
     loadData();
     
-    // Trigger animations after component mounts
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 100);
@@ -42,7 +41,6 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, [getProducts]);
 
-  // Filter products based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredProducts(products);
@@ -110,7 +108,6 @@ const Home = () => {
             </div>
           )}
 
-          {/* Search Results Header */}
               <div className="container mx-auto px-8 py-4">
         <SearchBar onSearch={handleSearch} />
       </div>
@@ -128,7 +125,6 @@ const Home = () => {
           </div>
         )}
 
-        {/* Products Section */}
         <div className="container mx-auto px-8">
           {isLoading ? (
             <div className={`flex justify-center items-center h-64 transform transition-all duration-500 ${isVisible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}>
@@ -156,7 +152,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Floating AI Chat Button */}
       <button 
         onClick={() => setAiChat(!aiChat)} 
         className="fixed bottom-8 right-8 z-[9999] bg-blue-600 text-white p-4 rounded-full hover:bg-blue-700 hover:scale-110 transition-all duration-200 shadow-2xl border-4 border-white"
@@ -175,7 +170,6 @@ const Home = () => {
         <BsRobot className="text-2xl" />
       </button>
 
-      {/* AI Chat Modal */}
       {aiChat && <Chat close={setAiChat} />}
     </>
   );

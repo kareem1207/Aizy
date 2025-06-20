@@ -9,7 +9,6 @@ import asyncio
 
 app = FastAPI(title="Ecommerce AI API", version="1.0.0")
 
-# CORS middleware for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -23,10 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize AI instance globally
 ai_instance = None
 
-# Pydantic models for request/response
 class FashionQuery(BaseModel):
     prompt: str
 
@@ -40,27 +37,22 @@ class AIResponse(BaseModel):
     data: Optional[dict] = None
 
 def initialize_ai_models():
-    """Initialize AI models synchronously"""
     global ai_instance
     try:
-        # Create directories if they don't exist
         os.makedirs("data", exist_ok=True)
         os.makedirs("plots", exist_ok=True)
         os.makedirs("models", exist_ok=True)
         
         print("🚀 Initializing AI models...")
         
-        # Initialize AI instance
         ai_instance = EcommerceAI()
         
-        # Fashion Assistant
         try:
             ai_instance.train_fashion_assistant("./data/fashion.csv")
             print("✅ Fashion assistant initialized")
         except Exception as e:
             print(f"⚠️ Fashion assistant initialization failed: {e}")
         
-        # Sales Forecaster (if data exists)
         try:
             if os.path.exists("./data/products.csv"):
                 ai_instance.train_sales_forecaster("./data/products.csv")
@@ -83,7 +75,6 @@ async def startup_event():
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, initialize_ai_models)
         
-        # Mount static files after AI initialization - only once
         if os.path.exists("plots") and not hasattr(app, '_plots_mounted'):
             app.mount("/plots", StaticFiles(directory="plots"), name="plots")
             app._plots_mounted = True
@@ -104,7 +95,6 @@ def health_check():
         "plots_available": os.path.exists("plots")
     }
 
-# Fashion Assistant Endpoints
 @app.post("/ai/fashion/query", response_model=AIResponse)
 async def fashion_query(query: FashionQuery):
     """Get fashion recommendations from AI"""
@@ -139,7 +129,6 @@ async def train_fashion_model(request: TrainingRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error training fashion model: {str(e)}")
 
-# Sales Forecasting Endpoints
 @app.post("/ai/sales/forecast", response_model=AIResponse)
 async def get_sales_forecast():
     """Get sales forecasting results"""
@@ -154,7 +143,7 @@ async def get_sales_forecast():
         result = ai_instance.sales_forecaster()
         print("✅ Sales forecast completed successfully")
         
-        # Add plot URLs to the result
+
         if result:
             plot_base_url = "http://127.0.0.1:8000/plots"
             best_product = result.get('best_overall_product', 'product')
@@ -199,7 +188,6 @@ async def train_sales_model(request: TrainingRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error training sales model: {str(e)}")
 
-# Admin AI Endpoints (placeholder for future implementation)
 @app.post("/ai/admin/train", response_model=AIResponse)
 async def train_admin_model(request: TrainingRequest):
     """Train admin AI model (fake account detection)"""
