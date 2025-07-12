@@ -373,6 +373,19 @@ We welcome contributions to Aizy! Please see our individual component documentat
 - Update documentation as needed
 - Ensure all tests pass before submitting
 
+## 📋 Code of Conduct
+
+We expect all contributors to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).  
+Aizy is a respectful, inclusive, and source-available project.
+
+## 📄 License
+
+This project is released under the **Aizy Source-Available Non-Commercial License (ASNCL) v1.0**.  
+Please see [LICENSE.md](./LICENSE.md) for full details.
+
+🔒 **Usage is restricted** strictly to educational and research purposes only.  
+📧 Contact [@kareem1207](https://github.com/kareem1207) for custom usage permissions.
+
 ## 🙏 Acknowledgments
 
 - **Annie Angel Yarram** ([@Annie2936](https://github.com/Annie2936)) - Lead Designer and Frontend Developer

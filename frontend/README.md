@@ -6,7 +6,6 @@ A modern, responsive React application built with Next.js, featuring beautiful a
 
 - **Next.js 15.3.3**: React framework with App Router
 - **React 19**: Latest React features
-- **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first CSS framework
 - **Framer Motion**: Advanced animations
 - **Zustand**: Lightweight state management
