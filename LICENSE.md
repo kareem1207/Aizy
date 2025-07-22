@@ -49,7 +49,7 @@ Any attempt to violate the terms of this license may result in legal action, DMC
 ## ✉️ Permission Requests
 
 To request permission for usage beyond the scope of this license, please contact:  
-📧 kareem1207@github.com (or via GitHub profile)
+📧 kareem1207@gmail.com (or via GitHub profile)
 
 ---
 
