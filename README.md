@@ -103,6 +103,32 @@ aizy/
 - **API Integration**: FastAPI for ML model serving
 - **Statistical Analysis**: Statsmodels for advanced analytics
 
+## 🧪 Try it without any setup (demo mode)
+
+Aizy ships with a **demo mode** that runs the entire store in your browser: product catalogue, sign-in, seller tools, admin tools, the AI fashion stylist and the sales forecaster. No MongoDB, MySQL, Python or backend is needed, and nothing leaves your browser (data lives in `localStorage`).
+
+```bash
+cd frontend
+npm install
+npm run dev          # demo mode is the default -> http://localhost:3000
+```
+
+Demo accounts (password `demo1234`): `customer@aizy.demo`, `seller@aizy.demo`, `admin@aizy.demo`. The login page also has one-click buttons. No payments exist anywhere in the app: orders only reserve stock.
+
+Build the static site that is hosted on GitHub Pages with `npm run build:pages` (output in `frontend/out`).
+
+### Run the real API without databases
+
+The Express API can also run entirely in memory (handy for development and tests):
+
+```bash
+cd backend
+npm install
+npm run dev:memory   # http://localhost:5000, demo accounts seeded, data resets on restart
+```
+
+Then start the frontend with `NEXT_PUBLIC_API_MODE=live` (see `frontend/.env.example`).
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -251,7 +277,7 @@ npm run test:coverage # Coverage report
 ### Backend Testing
 ```bash
 cd backend
-npm test              # Run API tests
+npm test              # API tests (in-memory data, no databases needed)
 npm run lint          # Code linting
 ```
 
@@ -309,20 +335,26 @@ Annie Angel Yarram is the creative force behind Aizy's stunning visual identity 
 
 ## 🔐 Environment Configuration
 
-### Backend Environment (`.env`)
+### Backend Environment (`backend/.env`)
+See [`backend/.env.example`](backend/.env.example) for every option. The essentials:
 ```env
 PORT=5000
-# MongoDB for products
-MONGODB_URI=your_mongodb_connection_string
-# MySQL for users
-DATABASE_URL="mysql://username:password@localhost:3306/aizy_users"
-JWT_SECRET=your_jwt_secret_key
+DATA_MODE=db                       # or "memory" to run without databases
+MONGO_URL=mongodb://localhost:27017/aizy        # products and orders
+SQL_DATABASE_URL=mysql://user:password@localhost:3306/aizy   # users (Prisma)
+JWT_SECRET=a-long-random-string    # required in production
+ADMIN_EMAIL=you@example.com        # creates the first admin on startup
+ADMIN_PASSWORD=at-least-8-chars
+RESEND_API_KEY=                    # optional: emails sign-up codes
+CORS_ORIGINS=http://localhost:3000
 ```
 
-### Frontend Environment (`.env.local`)
+### Frontend Environment (`frontend/.env.local`)
+See [`frontend/.env.example`](frontend/.env.example).
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
-NEXT_PUBLIC_APP_NAME=Aizy
+NEXT_PUBLIC_API_MODE=live          # "demo" (default) needs no backend
+NEXT_PUBLIC_BACKEND_API=http://localhost:5000
+NEXT_PUBLIC_AI_API=http://127.0.0.1:8000
 ```
 
 ### Python Environment

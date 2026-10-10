@@ -1,84 +1,93 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import Home from '@/ui/Home';
-import { useProductStore } from '@/store/productStore';
+import React from "react";
+import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
+import Home from "@/ui/Home";
+import { useProductStore } from "@/store/productStore";
+import { sampleProduct } from "../utils/test-utils";
 
-// Mock the Card component
-jest.mock('@/components/Card', () => ({
-  Card: ({ card }) => (
-    <div data-testid="card-component">
-      {card?.map(item => (
-        <div key={item._id || item.id}>Product: {item.name}</div>
-      ))}
-    </div>
-  )
-}));
+jest.mock("@/components/Chat", () => ({ Chat: ({ close }) => <div role="dialog" aria-label="AI stylist"><button onClick={() => close(false)}>x</button></div> }));
+jest.mock("react-toastify", () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
-// Mock the store
-jest.mock('@/store/productStore', () => ({
-  useProductStore: jest.fn()
-}));
+const catalogue = [
+  sampleProduct({ _id: "1", name: "Cotton Kurta Set", category: "Ethnic Wear", price: 1799, rating: 4.5, createdAt: "2026-01-01", shortDescription: "Festive set", description: "Soft cotton" }),
+  sampleProduct({ _id: "2", name: "Running Shoes", category: "Footwear", price: 3299, rating: 4.6, createdAt: "2026-03-01", shortDescription: "Cushioned", description: "For daily runs" }),
+  sampleProduct({ _id: "3", name: "Gel Pen Pack", category: "Stationery", price: 120, rating: 4.4, count: 0, createdAt: "2026-02-01", shortDescription: "Ten colours", description: "Smooth ink" }),
+];
 
-// Mock framer-motion
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }) => <div {...props}>{children}</div>,
-    h1: ({ children, ...props }) => <h1 {...props}>{children}</h1>,
-    p: ({ children, ...props }) => <p {...props}>{children}</p>,
-    span: ({ children, ...props }) => <span {...props}>{children}</span>,
-  },
-  AnimatePresence: ({ children }) => <>{children}</>,
-}));
+const load = (impl) => {
+  const getProducts = jest.fn(impl || (async () => {
+    useProductStore.setState({ products: catalogue });
+    return { success: true, data: catalogue };
+  }));
+  useProductStore.setState({ products: [], getProducts });
+  return getProducts;
+};
 
-describe('Home Component', () => {
-  const mockProducts = [
-    { _id: '1', name: 'Product 1', price: 99.99 },
-    { _id: '2', name: 'Product 2', price: 49.99 }
-  ];
+const names = () => within(screen.getByTestId("product-grid")).getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
 
-  beforeEach(() => {
-    // Mock implementation for getProducts
-    const mockGetProducts = jest.fn().mockResolvedValue({
-      data: mockProducts
-    });
-    
-    useProductStore.mockImplementation(() => ({
-      getProducts: mockGetProducts
-    }));
+describe("Home", () => {
+  test("shows a spinner, then the products", async () => {
+    load();
+    render(<Home />);
+    expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
+    await screen.findByTestId("product-grid");
+    expect(names()).toHaveLength(3);
+    expect(screen.getByTestId("result-count")).toHaveTextContent("3 products");
   });
 
-  it('renders loading state initially', () => {
+  test("shows an error with a working retry when the API is down", async () => {
+    let calls = 0;
+    load(async () => {
+      calls += 1;
+      if (calls === 1) return { success: false, message: "Cannot connect to the server" };
+      useProductStore.setState({ products: catalogue });
+      return { success: true, data: catalogue };
+    });
     render(<Home />);
-    
-    // Check if welcome message is displayed
-    expect(screen.getByText('Welcome to')).toBeInTheDocument();
-    expect(screen.getByText('Aizy')).toBeInTheDocument();
-    
-    // Check if loading animation is displayed
-    const loadingElement = document.querySelector('.animate-spin');
-    expect(loadingElement).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Cannot connect to the server");
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    await screen.findByTestId("product-grid");
   });
 
-  it('renders products after loading', async () => {
+  test("category tabs filter the grid", async () => {
+    load();
     render(<Home />);
-    
-    // Check if Card component is rendered with products after loading
-    await waitFor(() => {
-      expect(screen.getByTestId('card-component')).toBeInTheDocument();
-    });
+    await screen.findByTestId("product-grid");
+    fireEvent.click(screen.getByRole("tab", { name: "Footwear" }));
+    expect(names()).toEqual(["Running Shoes"]);
+    fireEvent.click(screen.getByRole("tab", { name: "All" }));
+    expect(names()).toHaveLength(3);
   });
 
-  it('handles error case gracefully', async () => {
-    // Mock implementation for a failed request
-    useProductStore.mockImplementation(() => ({
-      getProducts: jest.fn().mockRejectedValue(new Error('Failed to fetch'))
-    }));
-    
+  test("search narrows results and explains an empty result", async () => {
+    load();
     render(<Home />);
-    
-    // Check that the component doesn't crash and eventually completes loading
-    await waitFor(() => {
-      expect(screen.getByTestId('card-component')).toBeInTheDocument();
-    });
+    await screen.findByTestId("product-grid");
+    fireEvent.change(screen.getByPlaceholderText(/search for products/i), { target: { value: "kurta" } });
+    expect(names()).toEqual(["Cotton Kurta Set"]);
+    expect(screen.getByTestId("result-count")).toHaveTextContent("1 product");
+    fireEvent.change(screen.getByPlaceholderText(/search for products/i), { target: { value: "zzzz" } });
+    expect(screen.getByText(/No products found for/)).toBeInTheDocument();
+  });
+
+  test("sorting and the in-stock filter", async () => {
+    load();
+    render(<Home />);
+    await screen.findByTestId("product-grid");
+    fireEvent.change(screen.getByLabelText(/sort/i), { target: { value: "price-asc" } });
+    expect(names()).toEqual(["Gel Pen Pack", "Cotton Kurta Set", "Running Shoes"]);
+    fireEvent.change(screen.getByLabelText(/sort/i), { target: { value: "rating" } });
+    expect(names()[0]).toBe("Running Shoes");
+    fireEvent.click(screen.getByLabelText(/in stock only/i));
+    expect(names()).not.toContain("Gel Pen Pack");
+  });
+
+  test("the AI stylist button opens and closes the chat", async () => {
+    load();
+    render(<Home />);
+    await screen.findByTestId("product-grid");
+    fireEvent.click(screen.getByRole("button", { name: "Open AI stylist" }));
+    expect(screen.getByRole("dialog", { name: "AI stylist" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "x" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

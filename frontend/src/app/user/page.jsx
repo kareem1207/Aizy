@@ -1,8 +1,9 @@
 "use client";
-import jwt from "jsonwebtoken";
+import { decodeToken } from "@/lib/token";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "../../store/userStore";
 import { useEffect, useState, useRef } from "react";
+import { MyOrders } from "@/components/MyOrders";
 const User = () => {
     const router = useRouter();
     const { logoutUser, getUserProfile, updateProfile } = useUserStore();
@@ -24,7 +25,12 @@ const User = () => {
         
         if (token) {
             try {
-                const decoded = jwt.decode(token);
+                const decoded = decodeToken(token);
+                if (!decoded) {
+                    logoutUser();
+                    router.replace("/login");
+                    return;
+                }
                 setUserData({
                     name: decoded?.username || "Not Available",
                     email: decoded?.email || "Not Available",
@@ -33,9 +39,6 @@ const User = () => {
                     profilePicture: ""
                 });
                 setIsAdmin(decoded?.role === "admin");
-                console.log("Decoded token:", decoded);
-                console.log("User ID:", decoded?.userId);
-                
                 loadUserProfile();
             } catch (error) {
                 console.error("Error decoding token:", error);
@@ -61,8 +64,7 @@ const User = () => {
     const handleLogout = () => {
         const result = logoutUser();
         if (result.success) {
-            location.reload();
-            router.push("/login");
+            router.replace("/login");
         }
     };
 
@@ -329,6 +331,8 @@ const User = () => {
           )}
         </div>
         
+        {userData.role === "customer" && <MyOrders />}
+
         <div className="mt-10 flex flex-col sm:flex-row justify-end gap-4">
           <button 
           onClick={handleLogout}

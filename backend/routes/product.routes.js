@@ -10,18 +10,20 @@ import {
   getProductsByRating,
   getProductImage,
 } from "../controllers/product.controller.js";
+import { authMiddleware, requireRole } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
+const seller = [authMiddleware, requireRole("seller", "admin")];
 
 router.get("/", getProducts);
-router.get("/:id", getProductById);
 router.get("/category/:category", getProductsByCategory);
 router.get("/rating/:rating", getProductsByRating);
-router.get("/image/:id", getProductImage);
-
-router.post("/create", addProduct);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
 router.get("/seller/:email", getProductsByEmail);
+router.get("/image/:id", getProductImage);
+router.get("/:id", getProductById);
+
+router.post("/create", ...seller, addProduct);
+router.put("/:id", ...seller, updateProduct);
+router.delete("/:id", ...seller, deleteProduct);
 
 export default router;

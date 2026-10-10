@@ -1,76 +1,67 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { Header } from '@/ui/Header';
-import { useUserStore } from '@/store/userStore';
+import React from "react";
+import { render, screen, act } from "@testing-library/react";
+import { Header } from "@/ui/Header";
+import { useCartStore } from "@/store/cartStore";
+import { signIn } from "../utils/test-utils";
 
-// Mock Next.js Link and Image components
-jest.mock('next/link', () => {
-  return ({ href, children, ...rest }) => {
-    return (
-      <a href={href} {...rest}>
-        {children}
-      </a>
-    );
-  };
+jest.mock("@/components/DemoBanner", () => ({ DemoBanner: () => null }));
+
+beforeEach(() => {
+  useCartStore.setState({ items: [], open: false });
 });
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />;
-  },
-}));
-
-// Mock the store
-jest.mock('@/store/userStore', () => ({
-  useUserStore: jest.fn(),
-}));
-
-// Mock the components used in Header
-jest.mock('@/components/Language', () => ({
-  Language: () => <div data-testid="language-component">Language Component</div>,
-}));
-
-jest.mock('@/components/Location', () => ({
-  Location: () => <div data-testid="location-component">Location Component</div>,
-}));
-
-jest.mock('@/components/SearchBar', () => ({
-  SearchBar: () => <div data-testid="search-bar-component">SearchBar Component</div>,
-}));
-
-describe('Header Component', () => {
-  beforeEach(() => {
-    // Default mock implementation
-    useUserStore.mockImplementation(() => ({
-      user: null,
-    }));
-    
-    // Clear localStorage before each test
-    localStorage.clear();
+describe("Header", () => {
+  test("signed out: shows Login and the cart", () => {
+    render(<Header />);
+    expect(screen.getByTestId("login-link")).toHaveAttribute("href", "/login");
+    expect(screen.queryByTestId("account-link")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open cart/i })).toBeInTheDocument();
   });
 
-  it('renders login link when not logged in', () => {
+  test.each([
+    ["customer", "Account"],
+    ["seller", "Seller hub"],
+    ["admin", "Admin"],
+  ])("signed in as %s: shows %s", (role, label) => {
+    signIn(role);
     render(<Header />);
-    
-    expect(screen.getByTestId('language-component')).toBeInTheDocument();
-    expect(screen.getByTestId('location-component')).toBeInTheDocument();
-    expect(screen.getByTestId('search-bar-component')).toBeInTheDocument();
-    
-    const loginLink = screen.getByText('Login');
-    expect(loginLink).toBeInTheDocument();
-    expect(loginLink.closest('a')).toHaveAttribute('href', '/login');
+    expect(screen.getByTestId("account-link")).toHaveTextContent(label);
+    expect(screen.queryByTestId("login-link")).not.toBeInTheDocument();
   });
 
-  it('renders account link when logged in', () => {
-    // Set token in localStorage
-    localStorage.setItem('user_login_token', 'fake-token');
-    
+  test("sellers and admins do not get a shopping cart", () => {
+    signIn("seller");
     render(<Header />);
-    
-    const accountLink = screen.getByText('Account');
-    expect(accountLink).toBeInTheDocument();
-    expect(accountLink.closest('a')).toHaveAttribute('href', '/user');
+    expect(screen.queryByRole("button", { name: /open cart/i })).not.toBeInTheDocument();
+  });
+
+  test("an expired or corrupt token counts as signed out", () => {
+    localStorage.setItem("user_login_token", "not.a.token");
+    render(<Header />);
+    expect(screen.getByTestId("login-link")).toBeInTheDocument();
+  });
+
+  test("reacts to login and logout events without a reload", () => {
+    render(<Header />);
+    expect(screen.getByTestId("login-link")).toBeInTheDocument();
+    act(() => {
+      signIn("customer");
+      window.dispatchEvent(new Event("aizy-auth"));
+    });
+    expect(screen.getByTestId("account-link")).toBeInTheDocument();
+    act(() => {
+      localStorage.clear();
+      window.dispatchEvent(new Event("aizy-auth"));
+    });
+    expect(screen.getByTestId("login-link")).toBeInTheDocument();
+  });
+
+  test("the cart badge shows the number of items", () => {
+    render(<Header />);
+    act(() => {
+      useCartStore.getState().add({ _id: "a", name: "A", price: 10, count: 9, image: "" }, 2);
+      useCartStore.getState().add({ _id: "b", name: "B", price: 10, count: 9, image: "" }, 1);
+    });
+    expect(screen.getByTestId("cart-count")).toHaveTextContent("3");
   });
 });

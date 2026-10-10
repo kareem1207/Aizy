@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config();
+import { env } from "./env.js";
 
 export const connectDB = async () => {
-  try {
-    console.log(process.env.MONGO_URL);
-    const con = await mongoose.connect(process.env.MONGO_URL);
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    process.exit(1);
-  }
+  if (!env.mongoUrl) throw new Error("MONGO_URL is not set (or run with DATA_MODE=memory)");
+  await mongoose.connect(env.mongoUrl);
+  console.log("Connected to MongoDB");
 };
