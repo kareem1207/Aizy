@@ -1,121 +1,75 @@
 import { useProductStore } from "@/store/productStore";
-import fetchMock from "jest-fetch-mock";
+import { request } from "@/lib/api";
+import { isArt } from "@/lib/art";
+import { signIn, sampleProduct } from "../utils/test-utils";
 
-// Enable fetch mocks
-fetchMock.enableMocks();
+jest.mock("@/lib/api", () => ({ request: jest.fn() }));
+
+const ok = (data) => ({ ok: true, status: 200, data, message: "" });
+const bad = (message) => ({ ok: false, status: 400, data: {}, message });
+
+beforeEach(() => {
+  request.mockReset();
+  useProductStore.setState({ products: [] });
+});
 
 describe("productStore", () => {
-  beforeEach(() => {
-    fetchMock.resetMocks();
-    localStorage.clear();
-    localStorage.setItem("user_login_token", "fake-token");
+  test("getProducts reads `products` and fills in artwork for products without an image", async () => {
+    request.mockResolvedValue(ok({ success: true, products: [sampleProduct({ image: "" }), sampleProduct({ _id: "p2", image: "data:image/png;base64,AA" })] }));
+    const res = await useProductStore.getState().getProducts();
+    expect(res.success).toBe(true);
+    const [a, b] = useProductStore.getState().products;
+    expect(isArt(a.image)).toBe(true);
+    expect(b.image).toBe("data:image/png;base64,AA");
   });
 
-  describe("getProducts", () => {
-    it("fetches products successfully", async () => {
-      const mockProducts = [
-        { _id: "1", name: "Product 1", price: 99.99 },
-        { _id: "2", name: "Product 2", price: 49.99 },
-      ];
-
-      fetchMock.mockResponseOnce(
-        JSON.stringify({
-          success: true,
-          data: mockProducts,
-        })
-      );
-
-      const { getProducts } = useProductStore.getState();
-      const result = await getProducts();
-
-      expect(fetchMock).toHaveBeenCalled();
-      expect(result).toEqual({ success: true, data: mockProducts });
-    });
-
-    it("handles error when fetching products", async () => {
-      fetchMock.mockRejectOnce(new Error("Network error"));
-
-      const { getProducts } = useProductStore.getState();
-      const result = await getProducts();
-
-      expect(fetchMock).toHaveBeenCalled();
-      expect(result).toEqual({
-        success: false,
-        message: "Cannot connect to server",
-      });
-    });
+  test("getProducts reports failures instead of throwing", async () => {
+    request.mockResolvedValue(bad("Cannot connect"));
+    expect(await useProductStore.getState().getProducts()).toEqual({ success: false, message: "Cannot connect" });
   });
 
-  describe("getProductsBySeller", () => {
-    it("fetches seller products successfully", async () => {
-      const mockProducts = [
-        { _id: "1", name: "Seller Product 1", price: 99.99 },
-        { _id: "2", name: "Seller Product 2", price: 49.99 },
-      ];
-
-      fetchMock.mockResponseOnce(
-        JSON.stringify({
-          success: true,
-          data: mockProducts,
-        })
-      );
-
-      const { getProductsBySeller } = useProductStore.getState();
-      const result = await getProductsBySeller();
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining("/products/seller-products"),
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-            Authorization: "Bearer fake-token",
-          }),
-        })
-      );
-
-      expect(result).toEqual({ success: true, data: mockProducts });
-    });
+  test("createProduct validates, then prepends the saved product", async () => {
+    expect((await useProductStore.getState().createProduct({ name: "x" })).success).toBe(false);
+    request.mockResolvedValue(ok({ success: true, product: sampleProduct({ _id: "new" }) }));
+    const res = await useProductStore.getState().createProduct({ name: "Kurta", price: 10, category: "Ethnic Wear" });
+    expect(res.success).toBe(true);
+    expect(useProductStore.getState().products[0]._id).toBe("new");
+    expect(request).toHaveBeenCalledWith("/api/products/create", expect.objectContaining({ method: "POST", auth: true }));
   });
 
-  describe("createProduct", () => {
-    it("creates a product successfully", async () => {
-      const newProduct = {
-        name: "New Product",
-        price: 129.99,
-        category: "Electronics",
-        description: "Product description",
-        sellersName: "Test Seller",
-        count: 10,
-      };
+  test("createProduct refuses oversized images before calling the API", async () => {
+    const res = await useProductStore.getState().createProduct({ name: "a", price: 1, category: "c", image: "x".repeat(7000001) });
+    expect(res.success).toBe(false);
+    expect(request).not.toHaveBeenCalled();
+  });
 
-      fetchMock.mockResponseOnce(
-        JSON.stringify({
-          success: true,
-          message: "Product created successfully",
-          data: { _id: "new-id", ...newProduct },
-        })
-      );
+  test("deleteProduct removes it from state only on success", async () => {
+    useProductStore.setState({ products: [sampleProduct(), sampleProduct({ _id: "p2" })] });
+    request.mockResolvedValueOnce(bad("You can only modify your own products"));
+    expect((await useProductStore.getState().deleteProduct("p1")).success).toBe(false);
+    expect(useProductStore.getState().products).toHaveLength(2);
+    request.mockResolvedValueOnce(ok({ success: true }));
+    await useProductStore.getState().deleteProduct("p1");
+    expect(useProductStore.getState().products.map((p) => p._id)).toEqual(["p2"]);
+  });
 
-      const { createProduct } = useProductStore.getState();
-      const result = await createProduct(newProduct);
+  test("updateProduct swaps the updated product in", async () => {
+    useProductStore.setState({ products: [sampleProduct()] });
+    request.mockResolvedValue(ok({ success: true, product: sampleProduct({ price: 5 }) }));
+    await useProductStore.getState().updateProduct("p1", { price: 5 });
+    expect(useProductStore.getState().products[0].price).toBe(5);
+  });
 
-      expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining("/products/create"),
-        expect.objectContaining({
-          method: "POST",
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-            Authorization: "Bearer fake-token",
-          }),
-          body: JSON.stringify(newProduct),
-        })
-      );
+  test("getProductsBySeller uses the email inside the stored token", async () => {
+    signIn("seller", { email: "me@shop.in" });
+    request.mockResolvedValue(ok({ success: true, products: [sampleProduct()] }));
+    const res = await useProductStore.getState().getProductsBySeller();
+    expect(res.success).toBe(true);
+    expect(request).toHaveBeenCalledWith("/api/products/seller/me%40shop.in");
+  });
 
-      expect(result).toEqual({
-        success: true,
-        message: "Product created successfully",
-      });
-    });
+  test("getProductsBySeller without a session fails cleanly", async () => {
+    expect((await useProductStore.getState().getProductsBySeller()).success).toBe(false);
+    expect(request).not.toHaveBeenCalled();
   });
 });

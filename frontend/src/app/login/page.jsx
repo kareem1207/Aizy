@@ -1,258 +1,131 @@
 "use client";
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useUserStore } from '@/store/userStore';
-import { useRouter } from 'next/navigation';
-import { OTP } from '@/components/OTP';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { OTP } from "@/components/OTP";
+import { useUserStore } from "@/store/userStore";
+import { IS_DEMO } from "@/lib/config";
+import { DEMO_PASSWORD } from "@/lib/demo/seed";
+
+const DEMO_ACCOUNTS = [
+  { role: "customer", email: "customer@aizy.demo", blurb: "Browse, chat with the stylist, place demo orders" },
+  { role: "seller", email: "seller@aizy.demo", blurb: "Manage products and see sales forecasts" },
+  { role: "admin", email: "admin@aizy.demo", blurb: "Manage users, bans and admins" },
+];
+
+const field =
+  "w-full px-4 py-3.5 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60";
 
 const Login = () => {
-    const router = useRouter();
-    const [isLogin, setIsLogin] = useState(true);
-    const { loginUser, createUser, generateToken } = useUserStore();
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        userType: 'customer'
-    });
-    const [error, setError] = useState('');
-    const [isValid, setIsValid] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [success, setSuccess] = useState('');
-    const [showOtpFirst, setShowOtpFirst] = useState(false);
-    const [verifiedUser, setVerifiedUser] = useState(false);
-    
+  const router = useRouter();
+  const { loginUser, createUser } = useUserStore();
+  const [isLogin, setIsLogin] = useState(true);
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", userType: "customer" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [needOtp, setNeedOtp] = useState(false);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+  const change = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const switchMode = (login) => {
+    setIsLogin(login);
+    setError("");
+    setNeedOtp(false);
+  };
 
-    useEffect(() => {
-        if (isValid && showOtpFirst) {
-            setVerifiedUser(true);
-            setShowOtpFirst(false);
-            handleVerifiedSubmit();
-        }
-    }, [isValid]);
+  const finish = async (creds, signup) => {
+    setLoading(true);
+    setError("");
+    const result = signup ? await createUser(creds) : await loginUser(creds);
+    if (!result.success) {
+      setLoading(false);
+      setNeedOtp(false);
+      setError(
+        result.reason
+          ? `${result.message}. Reason: ${result.reason}${result.bannedUntil ? ` (until ${new Date(result.bannedUntil).toLocaleDateString()})` : ""}`
+          : result.message
+      );
+      return;
+    }
+    router.push("/");
+  };
 
-    const handleVerifiedSubmit = async () => {
-        setIsLoading(true);
-        try {
-            if (isLogin) {
-                const result = await loginUser(formData);
-                if (result.success) {
-                    setSuccess(result.message);
-                    await generateToken(formData); 
-                    router.push('/user');
-                } else {
-                    setError(result.message);
-                }
-            } else {
-                const result = await createUser(formData);
-                if (result.success) {
-                    setSuccess(result.message);
-                    await generateToken(formData);
-                    router.push('/user');
-                } else {
-                    setError(result.message);
-                }
-            }
-        } catch (err) {
-            setError('An unexpected error occurred. Please try again.');
-            console.error('Form submission error:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const submit = (e) => {
+    e.preventDefault();
+    setError("");
+    if (!isLogin) {
+      if (form.password.length < 8) return setError("Password must be at least 8 characters");
+      if (form.password !== form.confirmPassword) return setError("Passwords do not match");
+      setNeedOtp(true);
+      return;
+    }
+    finish(form, false);
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
+  const quick = (a) => finish({ email: a.email, password: DEMO_PASSWORD, userType: a.role }, false);
 
-        if (!isLogin && formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-        
-        if (verifiedUser) {
-            handleVerifiedSubmit();
-        } else {
-            setShowOtpFirst(true);
-        }
-    };
+  return (
+    <main className="min-h-[80vh] flex items-center justify-center bg-[#fffcf6] p-6 sm:p-8">
+      <div className="w-full max-w-md">
+        <h1 className="text-center text-6xl font-black text-[#3c6ca8] tracking-[0.1em] mb-8" style={{ textShadow: "2px 2px 4px rgba(60,108,168,.3)" }}>
+          AIZY
+        </h1>
 
-    return (
-        <>
-            <div className="min-h-screen flex items-center justify-center bg-[#fffcf6] p-8">
-                <div className="w-full max-w-md">
-                    {/* Logo */}
-                    <div className="text-center mb-8">
-                        <h1 className="text-7xl font-black text-[#3c6ca8] tracking-wider" style={{ 
-                            fontFamily: 'Arial Black, Helvetica, sans-serif',
-                            fontWeight: '900',
-                            letterSpacing: '0.1em',
-                            textShadow: '2px 2px 4px rgba(60, 108, 168, 0.3)'
-                        }}>
-                            AIZY
-                        </h1>
-                    </div>
-                    
-                    {/* Login Form */}
-                    <div className="bg-white/30 backdrop-blur-sm rounded-lg p-6 border border-[#3c6ca8]/20">
-                        {/* Login/Signup Toggle */}
-                        <div className="flex mb-6 bg-[#3c6ca8]/10 rounded-md p-1">
-                            <button 
-                                onClick={() => { setIsLogin(true); setError(''); setSuccess(''); setShowOtpFirst(false); setVerifiedUser(false); }} 
-                                className={`flex-1 py-2 px-4 rounded-sm text-center transition-all ${isLogin ? 'bg-[#3c6ca8] text-white' : 'text-[#3c6ca8]'}`}
-                            >
-                                Login
-                            </button>
-                            <button 
-                                onClick={() => { setIsLogin(false); setError(''); setSuccess(''); setShowOtpFirst(false); setVerifiedUser(false); }} 
-                                className={`flex-1 py-2 px-4 rounded-sm text-center transition-all ${!isLogin ? 'bg-[#3c6ca8] text-white' : 'text-[#3c6ca8]'}`}
-                            >
-                                Sign Up
-                            </button>
-                        </div>
-                        
-                        {error && (
-                            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                                {error}
-                            </div>
-                        )}
-                        
-                        {success && (
-                            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                                {success}
-                            </div>
-                        )}
-                        
-                        {showOtpFirst ? (
-                            <div className="mb-6">
-                                <h2 className="text-lg font-semibold text-[#3c6ca8] mb-4">
-                                    Verify Your Identity
-                                </h2>
-                                <OTP setUserValid={setIsValid} userInfo={formData} />
-                                <button
-                                    onClick={() => setShowOtpFirst(false)}
-                                    className="mt-4 w-full bg-gray-200 hover:bg-gray-300 text-[#3c6ca8] py-3 rounded-lg transition duration-200"
-                                >
-                                    Back
-                                </button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                {!isLogin && (
-                                    <div>
-                                        <input
-                                            type="text"
-                                            id="name"
-                                            name="name"
-                                            placeholder="Name"
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
-                                            required={!isLogin}
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-                                )}
-                                
-                                <div>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        placeholder="Email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
-                                        required
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                                
-                                <div>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        name="password"
-                                        placeholder="Password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
-                                        required
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                                
-                                {!isLogin && (
-                                    <div>
-                                        <input
-                                            type="password"
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            placeholder="Confirm Password"
-                                            value={formData.confirmPassword}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 placeholder-[#3c6ca8]/60"
-                                            required={!isLogin}
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-                                )}
-                                
-                                <div className="relative">
-                                    <select
-                                        id="userType"
-                                        name="userType"
-                                        value={formData.userType}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-4 rounded-lg border border-[#3c6ca8]/30 focus:outline-none focus:ring-2 focus:ring-[#3c6ca8] text-[#3c6ca8] bg-[#fffcf6]/80 appearance-none"
-                                        required
-                                        disabled={isLoading}
-                                    >
-                                        <option value="customer">Customer</option>
-                                        {isLogin && <option value="admin">Admin</option>}
-                                        <option value="seller">Seller</option>
-                                    </select>
-                                    <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 text-[#3c6ca8]">
-                                        <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                
-                                {isLogin && (
-                                    <div className="flex justify-end">
-                                        <Link href="/forgot-password" className="text-sm text-[#3c6ca8] hover:underline">
-                                            Forgot password?
-                                        </Link>
-                                    </div>
-                                )}
-                                
-                                <button
-                                    type="submit"
-                                    className={`w-full bg-[#3c6ca8] hover:bg-[#3c6ca8]/90 text-white py-3 rounded-md transition duration-200 font-semibold ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading 
-                                        ? 'Processing...' 
-                                        : verifiedUser 
-                                            ? isLogin ? 'Login Now' : 'Create Account Now' 
-                                            : 'Proceed'
-                                    }
-                                </button>
-                            </form>
-                        )}
-                    </div>
-                </div>
+        <div className="bg-white/60 rounded-xl p-6 border border-[#3c6ca8]/20 shadow-sm">
+          <div className="flex mb-6 bg-[#3c6ca8]/10 rounded-md p-1" role="tablist">
+            {[["Login", true], ["Sign Up", false]].map(([label, val]) => (
+              <button key={label} role="tab" aria-selected={isLogin === val} onClick={() => switchMode(val)} className={`flex-1 py-2 rounded-sm transition-all ${isLogin === val ? "bg-[#3c6ca8] text-white" : "text-[#3c6ca8]"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {error && (
+            <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-300 text-red-700 rounded-lg text-sm">{error}</div>
+          )}
+
+          {needOtp ? (
+            <OTP email={form.email} onBack={() => setNeedOtp(false)} onVerified={(proof) => finish({ ...form, proof }, true)} />
+          ) : (
+            <form onSubmit={submit} className="space-y-4" noValidate={false}>
+              {!isLogin && (
+                <input type="text" name="name" aria-label="Name" placeholder="Name" value={form.name} onChange={change} className={field} required maxLength={80} disabled={loading} />
+              )}
+              <input type="email" name="email" aria-label="Email" placeholder="Email" value={form.email} onChange={change} className={field} required disabled={loading} autoComplete="email" />
+              <input type="password" name="password" aria-label="Password" placeholder={isLogin ? "Password" : "Password (8+ characters)"} value={form.password} onChange={change} className={field} required disabled={loading} autoComplete={isLogin ? "current-password" : "new-password"} />
+              {!isLogin && (
+                <input type="password" name="confirmPassword" aria-label="Confirm password" placeholder="Confirm password" value={form.confirmPassword} onChange={change} className={field} required disabled={loading} autoComplete="new-password" />
+              )}
+              <select name="userType" aria-label="Account type" value={form.userType} onChange={change} className={field} disabled={loading}>
+                <option value="customer">Customer</option>
+                {isLogin && <option value="admin">Admin</option>}
+                <option value="seller">Seller</option>
+              </select>
+              <button type="submit" disabled={loading} className="w-full bg-[#3c6ca8] hover:bg-[#2c5f8c] text-white py-3 rounded-md font-semibold disabled:opacity-70">
+                {loading ? "Please wait…" : isLogin ? "Log in" : "Continue"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {IS_DEMO && !needOtp && (
+          <div className="mt-6 bg-white/60 rounded-xl p-5 border border-[#3c6ca8]/20" data-testid="demo-accounts">
+            <p className="font-semibold text-[#3c6ca8] mb-1">Just looking around?</p>
+            <p className="text-sm text-[#3c6ca8]/80 mb-3">One click signs you into a demo account. Nothing leaves your browser.</p>
+            <div className="space-y-2">
+              {DEMO_ACCOUNTS.map((a) => (
+                <button key={a.role} onClick={() => quick(a)} disabled={loading} className="w-full text-left px-4 py-2.5 rounded-lg border border-[#3c6ca8]/30 hover:bg-[#3c6ca8]/10 disabled:opacity-60">
+                  <span className="font-medium text-[#3c6ca8] capitalize">Continue as {a.role}</span>
+                  <span className="block text-xs text-gray-500">{a.blurb}</span>
+                </button>
+              ))}
             </div>
-        </>
-    );
+            <p className="text-xs text-gray-500 mt-3">
+              Or type them in: <code>{DEMO_ACCOUNTS[0].email}</code>, password <code>{DEMO_PASSWORD}</code>.
+            </p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
 };
 
 export default Login;

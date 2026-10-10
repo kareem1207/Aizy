@@ -1,71 +1,80 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { Card } from '@/components/Card';
+import React from "react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import { Card } from "@/components/Card";
+import { useCartStore } from "@/store/cartStore";
+import { sampleProduct } from "../utils/test-utils";
 
-// Mock Next.js Image component
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />;
-  },
-}));
+jest.mock("react-toastify", () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
+import { toast } from "react-toastify";
 
-// Mock framer-motion
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }) => <div {...props}>{children}</div>,
-    p: ({ children, ...props }) => <p {...props}>{children}</p>,
-    button: ({ children, ...props }) => <button {...props}>{children}</button>,
-  },
-  AnimatePresence: ({ children }) => <>{children}</>,
-}));
+beforeEach(() => {
+  useCartStore.setState({ items: [], open: false });
+  jest.clearAllMocks();
+});
 
-describe('Card Component', () => {
-  const mockProducts = [
-    {
-      id: '1',
-      name: 'Test Product',
-      price: 99.99,
-      rating: 4.5,
-      image: '/test-image.jpg',
-    },
-    {
-      id: '2',
-      name: 'Another Product',
-      price: 49.99,
-      rating: 4.0,
-      image: '/another-image.jpg',
-    },
-  ];
-
-  it('renders products correctly', () => {
-    render(<Card card={mockProducts} />);
-    
-    // Check if product names are rendered
-    expect(screen.getByText('Test Product')).toBeInTheDocument();
-    expect(screen.getByText('Another Product')).toBeInTheDocument();
-    
-    // Check if prices are rendered correctly
-    expect(screen.getByText('₹99.99')).toBeInTheDocument();
-    expect(screen.getByText('₹49.99')).toBeInTheDocument();
-    
-    // Check for ratings
-    expect(screen.getByText('4.5')).toBeInTheDocument();
-    expect(screen.getByText('4.0')).toBeInTheDocument();
-    
-    // Check for buttons
-    const addToCartButtons = screen.getAllByText('Add to Cart');
-    expect(addToCartButtons).toHaveLength(2);
+describe("Card grid", () => {
+  test("renders every product with name, price and category", () => {
+    render(<Card card={[sampleProduct(), sampleProduct({ _id: "p2", name: "Running Shoes", price: 3299, category: "Footwear" })]} />);
+    expect(screen.getByText("Cotton Kurta Set")).toBeInTheDocument();
+    expect(screen.getByText("Running Shoes")).toBeInTheDocument();
+    expect(screen.getByText("₹1,799")).toBeInTheDocument();
+    expect(screen.getByText("₹3,299")).toBeInTheDocument();
   });
 
-  it('renders nothing when no products are provided', () => {
-    const { container } = render(<Card card={[]} />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+  test("renders nothing for a missing list", () => {
+    const { container } = render(<Card card={null} />);
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('handles undefined card prop gracefully', () => {
-    const { container } = render(<Card />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+  test("add to cart puts the product in the cart and confirms with a toast", () => {
+    render(<Card card={[sampleProduct()]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+    expect(useCartStore.getState().items).toEqual([expect.objectContaining({ _id: "p1", qty: 1 })]);
+    expect(toast.success).toHaveBeenCalled();
+  });
+
+  test("adding twice increments, and stops at the available stock", () => {
+    render(<Card card={[sampleProduct({ count: 2 })]} />);
+    const add = screen.getByRole("button", { name: "Add to cart" });
+    fireEvent.click(add);
+    fireEvent.click(add);
+    fireEvent.click(add);
+    expect(useCartStore.getState().items[0].qty).toBe(2);
+    expect(toast.error).toHaveBeenCalledWith("Only 2 available");
+  });
+
+  test("out-of-stock products cannot be added", () => {
+    render(<Card card={[sampleProduct({ count: 0 })]} />);
+    const btn = screen.getByRole("button", { name: "Unavailable" });
+    expect(btn).toBeDisabled();
+    expect(screen.getByText("Out of stock")).toBeInTheDocument();
+  });
+
+  test("low stock is flagged", () => {
+    render(<Card card={[sampleProduct({ count: 3 })]} />);
+    expect(screen.getByText("Only 3 left")).toBeInTheDocument();
+  });
+
+  test("clicking a product opens its details, which can be closed with Escape", () => {
+    render(<Card card={[sampleProduct()]} />);
+    fireEvent.click(screen.getByRole("button", { name: "View Cotton Kurta Set" }));
+    const dialog = screen.getByRole("dialog", { name: "Cotton Kurta Set" });
+    expect(dialog).toHaveTextContent("A longer description");
+    expect(dialog).toHaveTextContent("Sold by Aizy Official");
+    act(() => {
+      fireEvent.keyDown(window, { key: "Escape" });
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("the details dialog adds the chosen quantity", () => {
+    render(<Card card={[sampleProduct()]} />);
+    fireEvent.click(screen.getByRole("button", { name: "View Cotton Kurta Set" }));
+    fireEvent.click(screen.getByRole("button", { name: "Increase quantity" }));
+    fireEvent.click(screen.getByRole("button", { name: "Increase quantity" }));
+    expect(screen.getByTestId("modal-qty")).toHaveTextContent("3");
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(dialog.querySelector("button.flex-1"));
+    expect(useCartStore.getState().items[0].qty).toBe(3);
   });
 });

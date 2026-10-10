@@ -1,571 +1,128 @@
 import { create } from "zustand";
+import { request } from "@/lib/api";
+import { TOKEN_KEY } from "@/lib/token";
 
-const api = process.env.NEXT_PUBLIC_BACKEND_API || "http://localhost:5000";
-export const useUserStore = create((set) => ({
+const fail = (res) => ({ success: false, message: res.message });
+
+// The API returns a session token with login/register; keep it and tell the header.
+function saveToken(token) {
+  if (!token) return;
+  localStorage.setItem(TOKEN_KEY, token);
+  window.dispatchEvent(new Event("aizy-auth"));
+}
+
+export const useUserStore = create((set, get) => ({
   user: null,
   users: [],
   bannedUsers: [],
   setUser: (user) => set({ user }),
 
   createUser: async (user) => {
-    if (!user.password || !user.email || !user.name) {
+    if (!user?.password || !user?.email || !user?.name) {
       return { success: false, message: "Please provide all fields" };
     }
-
-    console.log("Starting user creation attempt...");
-    try {
-      const userData = {
+    const res = await request("/auth/register", {
+      method: "POST",
+      body: {
         name: user.name,
         email: user.email,
         password: user.password,
         role: user.userType || "customer",
-      };
-
-      console.log("Preparing to send user data:", {
-        ...userData,
-        password: "****",
-      });
-
-      const res = await fetch(`${api}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(userData),
-      });
-
-      console.log("Fetch response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Error response:", errorText);
-
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      console.log("Response data:", data);
-
-      if (data.success) {
-        set({ user: data.data });
-        return {
-          success: true,
-          message: data.message || "User created successfully",
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to create user",
-        };
-      }
-    } catch (error) {
-      console.error("Error creating user:", error);
-      return {
-        success: false,
-        message:
-          "Cannot connect to server. Please ensure your backend is running at ${api}",
-      };
-    }
+        proof: user.proof,
+      },
+    });
+    if (!res.ok) return fail(res);
+    set({ user: res.data.data });
+    saveToken(res.data.token);
+    return { success: true, message: res.data.message || "User created successfully" };
   },
 
   loginUser: async (user) => {
-    try {
-      const loginData = {
-        email: user.email,
-        password: user.password,
-        role: user.userType,
-      };
-
-      const res = await fetch(`${api}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(loginData),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        set({ user: data.data });
-        return { success: true, message: data.message || "Login successful" };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Invalid email or password",
-        };
-      }
-    } catch (error) {
-      console.error("Error logging in:", error);
-      return {
-        success: false,
-        message:
-          "Cannot connect to server. Please check if the backend is running at ${api}",
-      };
-    }
-  },
-
-  generateToken: async (user) => {
-    const response = await fetch(`${api}/auth/generate-token`, {
+    const res = await request("/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
+      body: { email: user.email, password: user.password, role: user.userType },
     });
-
-    if (response.ok) {
-      const data = await response.json();
-      set(data.token);
-      localStorage.setItem("user_login_token", data.token);
-    } else {
-      console.error("Failed to generate token");
+    if (!res.ok) {
+      return { ...fail(res), reason: res.data.reason, bannedUntil: res.data.bannedUntil };
     }
+    set({ user: res.data.data });
+    saveToken(res.data.token);
+    return { success: true, message: res.data.message || "Login successful" };
   },
 
   logoutUser: () => {
-    localStorage.removeItem("user_login_token");
-    set({ user: null });
+    localStorage.removeItem(TOKEN_KEY);
+    window.dispatchEvent(new Event("aizy-auth"));
+    set({ user: null, users: [], bannedUsers: [] });
     return { success: true, message: "Logged out successfully" };
   },
 
-  generateOtp: async () => {
-    const res = await fetch(`${api}/auth/generate-otp`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  generateOtp: async (email) => {
+    const res = await request("/auth/generate-otp", { method: "POST", body: { email } });
+    if (!res.ok) return { success: false, message: res.message || "Failed to generate OTP" };
+    // demoOtp (demo backend) / devOtp (live backend without an email provider) are only sent when no email goes out.
+    return { success: true, message: res.data.message, demoOtp: res.data.demoOtp || res.data.devOtp };
+  },
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error generating OTP:", errorText);
-      return { success: false, message: "Failed to generate OTP" };
-    }
-
-    const data = await res.json();
-    return { success: true, message: "OTP generated successfully", data };
+  verifyOtp: async (email, otp) => {
+    const res = await request("/auth/verify-otp", { method: "POST", body: { email, otp } });
+    return res.ok ? { success: true, proof: res.data.proof } : fail(res);
   },
 
   getAllUsers: async () => {
-    try {
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/users`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      if (data.success) {
-        set({ users: data.data });
-        return { success: true, data: data.data };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to fetch users",
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
-    }
+    const res = await request("/auth/users", { auth: true });
+    if (!res.ok) return fail(res);
+    set({ users: res.data.data });
+    return { success: true, data: res.data.data };
   },
 
   getBannedUsers: async () => {
-    try {
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/banned-users`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      if (data.success) {
-        set({ bannedUsers: data.data });
-        return { success: true, data: data.data };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to fetch banned users",
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching banned users:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
-    }
+    const res = await request("/auth/banned-users", { auth: true });
+    if (!res.ok) return fail(res);
+    set({ bannedUsers: res.data.data });
+    return { success: true, data: res.data.data };
   },
 
   banUser: async (userId, reason, banDuration) => {
-    try {
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/ban-user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userId,
-          reason,
-          banDuration,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      if (data.success) {
-        const { getBannedUsers } = useUserStore.getState();
-        await getBannedUsers();
-        return {
-          success: true,
-          message: data.message || "User banned successfully",
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to ban user",
-        };
-      }
-    } catch (error) {
-      console.error("Error banning user:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
-    }
+    const res = await request("/auth/ban-user", { method: "POST", auth: true, body: { userId, reason, banDuration } });
+    if (!res.ok) return fail(res);
+    await get().getBannedUsers();
+    return { success: true, message: res.data.message || "User banned successfully" };
   },
 
   unbanUser: async (userId) => {
-    try {
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/unban-user`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      if (data.success) {
-        const { getBannedUsers } = useUserStore.getState();
-        await getBannedUsers();
-        return {
-          success: true,
-          message: data.message || "User unbanned successfully",
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to unban user",
-        };
-      }
-    } catch (error) {
-      console.error("Error unbanning user:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
-    }
+    const res = await request("/auth/unban-user", { method: "POST", auth: true, body: { userId } });
+    if (!res.ok) return fail(res);
+    await get().getBannedUsers();
+    return { success: true, message: res.data.message || "User unbanned successfully" };
   },
 
   createAdmin: async (adminData) => {
-    try {
-      if (
-        !adminData.name ||
-        !adminData.email ||
-        !adminData.password ||
-        !adminData.adminId
-      ) {
-        return { success: false, message: "All fields are required" };
-      }
-
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/create-admin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: adminData.name,
-          email: adminData.email,
-          password: adminData.password,
-          adminId: adminData.adminId,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        const { getAllUsers } = useUserStore.getState();
-        await getAllUsers();
-
-        return {
-          success: true,
-          message: data.message || "Admin created successfully",
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to create admin",
-        };
-      }
-    } catch (error) {
-      console.error("Error creating admin:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
+    if (!adminData?.name || !adminData?.email || !adminData?.password || !adminData?.adminId) {
+      return { success: false, message: "All fields are required" };
     }
+    const res = await request("/auth/create-admin", {
+      method: "POST",
+      auth: true,
+      body: {
+        name: adminData.name,
+        email: adminData.email,
+        password: adminData.password,
+        adminId: adminData.adminId,
+      },
+    });
+    if (!res.ok) return fail(res);
+    await get().getAllUsers();
+    return { success: true, message: res.data.message || "Admin created successfully" };
   },
 
   getUserProfile: async () => {
-    try {
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/profile`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      if (data.success) {
-        return { success: true, data: data.data };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to fetch profile",
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
-    }
+    const res = await request("/auth/profile", { auth: true });
+    return res.ok ? { success: true, data: res.data.data } : fail(res);
   },
 
   updateProfile: async (profileData) => {
-    try {
-      const token = localStorage.getItem("user_login_token");
-      if (!token) {
-        return { success: false, message: "Authentication required" };
-      }
-
-      const res = await fetch(`${api}/auth/update-profile`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(profileData),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          return {
-            success: false,
-            message:
-              errorData.message || `Error: ${res.status} ${res.statusText}`,
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: errorText || `Error: ${res.status} ${res.statusText}`,
-          };
-        }
-      }
-
-      const data = await res.json();
-      if (data.success) {
-        return { success: true, data: data.data, message: data.message };
-      } else {
-        return {
-          success: false,
-          message: data.message || "Failed to update profile",
-        };
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      return {
-        success: false,
-        message: "Cannot connect to server",
-      };
-    }
+    const res = await request("/auth/update-profile", { method: "POST", auth: true, body: profileData });
+    return res.ok ? { success: true, data: res.data.data, message: res.data.message } : fail(res);
   },
 }));

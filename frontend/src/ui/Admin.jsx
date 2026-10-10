@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useUserStore } from '@/store/userStore';
-import jwt from 'jsonwebtoken';
+import { decodeToken } from "@/lib/token";
 import { useRouter } from 'next/navigation';
 import { BanDialogueBox } from '@/components/BanDialogueBox';
 import { AddAdminForm } from '@/components/AddAdminForm';
@@ -28,7 +28,7 @@ export const Admin = () => {
         const token = localStorage.getItem("user_login_token");
         if (token) {
             try {
-                const decoded = jwt.decode(token);
+                const decoded = decodeToken(token);
                 setCurrentUser(decoded);
                 
                 if (decoded?.role !== 'admin') {

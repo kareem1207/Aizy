@@ -1,76 +1,45 @@
-name: "Aizy CI/CD Workflow"
+name: Aizy CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  test-backend:
+  backend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
-          cache: "npm"
-          cache-dependency-path: "backend/package.json"
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      # Tests run against the in-memory repositories, so no database services are needed.
+      - run: npm test
+        env:
+          NODE_ENV: test
 
-      - name: Install backend dependencies
-        run: cd backend && npm ci
-
-      - name: Create .env file
-        run: |
-          cd backend
-          echo "PORT=5000" >> .env
-          echo "MONGO_URL=mongodb://localhost:27017/aizy_test" >> .env
-          echo "SQL_DATABASE_URL=mysql://test:test@localhost:3306/aizy_test" >> .env
-          echo "JWT_SECRET=test_secret_key" >> .env
-
-      - name: Lint backend code
-        run: cd backend && npm run lint || echo "No lint script found, skipping"
-
-      - name: Run backend tests
-        run: cd backend && npm test || echo "No test script found, skipping"
-
-  test-frontend:
+  frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
-          cache: "npm"
-          cache-dependency-path: "frontend/package.json"
-
-      - name: Install frontend dependencies
-        run: cd frontend && npm ci
-
-      - name: Lint frontend code
-        run: cd frontend && npm run lint
-
-      - name: Run frontend tests
-        run: cd frontend && npm test || echo "No test script found, skipping"
-
-      - name: Build frontend
-        run: cd frontend && npm run build
-
-  build:
-    needs: [test-backend, test-frontend]
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Build notification
-        run: echo "All tests passed! Ready to deploy."
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - name: Build the static demo
+        run: npm run build:pages

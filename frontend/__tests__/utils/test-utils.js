@@ -1,40 +1,30 @@
-import React from "react";
-import { render } from "@testing-library/react";
+import { makeDemoToken, TOKEN_KEY } from "@/lib/token";
 
-/**
- * Custom render function that can be extended with providers if needed
- */
-const customRender = (ui, options = {}) => {
-  return render(ui, { ...options });
+/** Signs a demo-format session token for a role and stores it like the app does. */
+export const signIn = (role = "customer", extra = {}) => {
+  const token = makeDemoToken({
+    userId: 1,
+    username: `Test ${role}`,
+    email: `${role}@example.com`,
+    role,
+    ...extra,
+  });
+  window.localStorage.setItem(TOKEN_KEY, token);
+  return token;
 };
 
-// Re-export everything from testing-library
-export * from "@testing-library/react";
-
-// Override render method
-export { customRender as render };
-
-/**
- * Helper function to simulate local storage for tests
- */
-export const setupLocalStorage = (key, value) => {
-  localStorage.setItem(
-    key,
-    typeof value === "string" ? value : JSON.stringify(value)
-  );
-};
-
-/**
- * Helper function to create a mock JWT token for testing
- */
-export const createMockToken = (userData = {}) => {
-  const defaultData = {
-    userId: "test-user-id",
-    username: "Test User",
-    email: "test@example.com",
-    role: "customer",
-    ...userData,
-  };
-
-  return `fake-token-${JSON.stringify(defaultData)}`;
-};
+export const sampleProduct = (over = {}) => ({
+  _id: "p1",
+  name: "Cotton Kurta Set",
+  category: "Ethnic Wear",
+  price: 1799,
+  count: 10,
+  rating: 4.5,
+  shortDescription: "Breathable kurta set",
+  description: "A longer description",
+  image: "data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E",
+  sellersName: "Aizy Official",
+  sellersEmail: "seller@aizy.demo",
+  createdAt: "2026-01-01T00:00:00.000Z",
+  ...over,
+});

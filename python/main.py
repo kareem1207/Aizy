@@ -1,26 +1,48 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from ai import EcommerceAI
+import hmac
 import os
+from pathlib import Path
 from typing import Optional
 import asyncio
 
 app = FastAPI(title="Ecommerce AI API", version="1.0.0")
 
+# Comma-separated list of browser origins allowed to call this API.
+_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001"
-    ],
+    allow_origins=[o.strip() for o in _origins.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+DATA_DIR = Path("data").resolve()
+
+
+def require_admin(x_admin_token: Optional[str] = Header(default=None)):
+    """Training endpoints change server state, so they need AI_ADMIN_TOKEN (disabled when unset)."""
+    expected = os.getenv("AI_ADMIN_TOKEN")
+    if not expected:
+        raise HTTPException(status_code=403, detail="Training endpoints are disabled (AI_ADMIN_TOKEN is not set)")
+    if not x_admin_token or not hmac.compare_digest(x_admin_token, expected):
+        raise HTTPException(status_code=401, detail="Invalid admin token")
+
+
+def data_file(requested: Optional[str], default: str) -> str:
+    """Resolve a dataset path and refuse anything outside ./data (no path traversal)."""
+    target = (DATA_DIR / Path(requested or default).name).resolve()
+    if DATA_DIR not in target.parents:
+        raise HTTPException(status_code=400, detail="Dataset must live in the data directory")
+    return str(target)
+
 
 ai_instance = None
 
@@ -112,7 +134,7 @@ async def fashion_query(query: FashionQuery):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting fashion advice: {str(e)}")
 
-@app.post("/ai/fashion/train", response_model=AIResponse)
+@app.post("/ai/fashion/train", response_model=AIResponse, dependencies=[Depends(require_admin)])
 async def train_fashion_model(request: TrainingRequest):
     """Train or retrain the fashion assistant model"""
     global ai_instance
@@ -120,12 +142,14 @@ async def train_fashion_model(request: TrainingRequest):
         if ai_instance is None:
             ai_instance = EcommerceAI()
             
-        filepath = request.filepath or "./data/fashion.csv"
+        filepath = data_file(request.filepath, "fashion.csv")
         ai_instance.train_fashion_assistant(filepath)
         return AIResponse(
             success=True,
             message="Fashion assistant model trained successfully"
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error training fashion model: {str(e)}")
 
@@ -166,7 +190,7 @@ async def get_sales_forecast():
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error getting sales forecast: {str(e)}")
 
-@app.post("/ai/sales/train", response_model=AIResponse)
+@app.post("/ai/sales/train", response_model=AIResponse, dependencies=[Depends(require_admin)])
 async def train_sales_model(request: TrainingRequest):
     """Train or retrain the sales forecasting model"""
     global ai_instance
@@ -174,8 +198,8 @@ async def train_sales_model(request: TrainingRequest):
         if ai_instance is None:
             ai_instance = EcommerceAI()
             
-        filepath = request.filepath or "./data/products.csv"
-        months = request.months_to_forecast or 3
+        filepath = data_file(request.filepath, "products.csv")
+        months = min(max(request.months_to_forecast or 3, 1), 24)
         
         success = ai_instance.train_sales_forecaster(filepath, months)
         if success:
@@ -185,19 +209,12 @@ async def train_sales_model(request: TrainingRequest):
             )
         else:
             raise HTTPException(status_code=400, detail="Failed to train sales model")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error training sales model: {str(e)}")
 
-@app.post("/ai/admin/train", response_model=AIResponse)
+@app.post("/ai/admin/train", response_model=AIResponse, dependencies=[Depends(require_admin)])
 async def train_admin_model(request: TrainingRequest):
-    """Train admin AI model (fake account detection)"""
-    global ai_instance
-    try:
-        if ai_instance is None:
-            ai_instance = EcommerceAI()
-            
-        filepath = request.filepath or "./data/fake_accounts.csv"
-        ai_instance.train_admin_ai(filepath)
-        return AIResponse(success=True, message="Admin AI model training initiated")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error training admin model: {str(e)}")
+    """Placeholder: fake-account detection is not implemented yet."""
+    raise HTTPException(status_code=501, detail="Admin AI model training is not implemented")

@@ -20,6 +20,6 @@
 
 body {
   color: var(--primary-blue);
-  background: var(----background);
+  background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }

@@ -22,19 +22,21 @@ const productSchema = mongoose.Schema(
     },
     shortDescription: {
       type: String,
-      required: true,
+      default: "",
     },
     description: {
       type: String,
-      required: true,
+      default: "",
     },
     price: {
       type: Number,
       required: true,
+      min: 0,
     },
     count: {
       type: Number,
       required: true,
+      min: 0,
     },
     rating: {
       type: Number,
