@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 import { formatINR } from "@/lib/format";
 import { ProductModal } from "./ProductModal";
 
@@ -23,6 +24,8 @@ export const addToCartWithToast = (product, qty = 1) => {
 
 export const Card = ({ card }) => {
   const [selected, setSelected] = useState(null);
+  const saved = useWishlistStore((s) => s.ids);
+  const toggleSaved = useWishlistStore((s) => s.toggle);
   if (!card) return null;
 
   return (
@@ -56,6 +59,15 @@ export const Card = ({ card }) => {
                     <Stars value={item.rating} />
                   </div>
                 </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleSaved(item._id)}
+                aria-pressed={saved.includes(item._id)}
+                aria-label={saved.includes(item._id) ? `Remove ${item.name} from saved` : `Save ${item.name}`}
+                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:scale-110 transition"
+              >
+                <svg className={`w-4.5 h-4.5 ${saved.includes(item._id) ? "text-red-500" : "text-gray-400"}`} width="18" height="18" viewBox="0 0 24 24" fill={saved.includes(item._id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21s-7-4.6-9.3-9.1C1.1 8.7 3 5 6.5 5c2 0 3.7 1.1 5.5 3 1.8-1.9 3.5-3 5.5-3C21 5 22.9 8.7 21.3 11.9 19 16.4 12 21 12 21z" /></svg>
               </button>
               <div className="px-3 pb-3">
                 <button
