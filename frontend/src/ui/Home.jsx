@@ -6,6 +6,7 @@ import { Card } from "@/components/Card";
 import { Chat } from "@/components/Chat";
 import { SearchBar } from "@/components/SearchBar";
 import { useProductStore } from "@/store/productStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 
 const SORTS = {
   featured: { label: "Featured", fn: null },
@@ -25,6 +26,10 @@ const Home = () => {
   const [sort, setSort] = useState("featured");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [aiChat, setAiChat] = useState(false);
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(null);
+  const savedIds = useWishlistStore((s) => s.ids);
+  const hydrateSaved = useWishlistStore((s) => s.hydrate);
 
   const load = async () => {
     setStatus("loading");
@@ -37,6 +42,7 @@ const Home = () => {
   };
 
   useEffect(() => {
+    hydrateSaved();
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -52,6 +58,8 @@ const Home = () => {
     let list = products.filter((p) => {
       if (category !== "All" && p.category !== category) return false;
       if (inStockOnly && p.count <= 0) return false;
+      if (savedOnly && !savedIds.includes(p._id)) return false;
+      if (maxPrice !== null && p.price > maxPrice) return false;
       if (!q) return true;
       return [p.name, p.description, p.shortDescription, p.category, p.sellersName]
         .some((f) => String(f || "").toLowerCase().includes(q));
@@ -59,8 +67,9 @@ const Home = () => {
     const fn = SORTS[sort].fn;
     if (fn) list = [...list].sort(fn);
     return list;
-  }, [products, query, category, sort, inStockOnly]);
+  }, [products, query, category, sort, inStockOnly, savedOnly, savedIds, maxPrice]);
 
+  const priceCeiling = useMemo(() => Math.max(1000, ...products.map((p) => p.price || 0)), [products]);
   const searching = query.trim().length > 0;
 
   return (
@@ -106,6 +115,24 @@ const Home = () => {
               {visible.length} product{visible.length === 1 ? "" : "s"}
             </p>
             <div className="flex items-center gap-4">
+              <label className="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={savedOnly} onChange={(e) => setSavedOnly(e.target.checked)} className="accent-[#3c6ca8]" />
+                Saved ({savedIds.length})
+              </label>
+              <label className="inline-flex items-center gap-2">
+                Max price
+                <input
+                  type="range"
+                  min="100"
+                  max={priceCeiling}
+                  step="100"
+                  value={maxPrice ?? priceCeiling}
+                  onChange={(e) => setMaxPrice(Number(e.target.value) >= priceCeiling ? null : Number(e.target.value))}
+                  aria-label="Maximum price"
+                  className="accent-[#3c6ca8] w-28"
+                />
+                <span className="w-16 text-gray-700">{maxPrice === null ? "Any" : `₹${maxPrice.toLocaleString("en-IN")}`}</span>
+              </label>
               <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} className="accent-[#3c6ca8]" />
                 In stock only

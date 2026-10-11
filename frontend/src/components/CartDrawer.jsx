@@ -51,7 +51,7 @@ export const CartDrawer = () => {
 
         {placed ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-3">
-            <div className="text-5xl">🎉</div>
+            <svg className="w-14 h-14 text-green-600" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.7 2.7L16 9.5" /></svg>
             <h3 className="text-xl font-semibold text-[#3c6ca8]" data-testid="order-id">Order {placed.id} placed</h3>
             <p className="text-gray-600 text-sm">
               {formatINR(placed.total)} · {IS_DEMO ? "demo order, no payment was taken." : "payment is not collected online yet."}
@@ -60,7 +60,7 @@ export const CartDrawer = () => {
           </div>
         ) : items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-2 text-[#3c6ca8]/70">
-            <div className="text-5xl">🛒</div>
+            <svg className="w-14 h-14 text-[#3c6ca8]/50" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13L5.4 5M7 13l-2 5h13M9 21a1 1 0 100-2 1 1 0 000 2zm9 0a1 1 0 100-2 1 1 0 000 2z" /></svg>
             <p className="font-medium">Your cart is empty</p>
             <button onClick={close} className="mt-2 text-sm underline">Browse products</button>
           </div>

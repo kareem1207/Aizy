@@ -94,7 +94,7 @@ const json = (status, body) =>
 const fail = (status, message, extra = {}) => json(status, { success: false, message, ...extra });
 
 const publicUser = ({ pw, ...rest }) => rest;
-const productView = (p) => ({ ...p, image: p.image || productArt(p.category, p.emoji) });
+const productView = (p) => ({ ...p, image: p.image || productArt(p.category, p.name) });
 
 function authOf(init) {
   const h = init?.headers || {};
@@ -313,7 +313,6 @@ function productRoute(db, auth, method, parts, init) {
     const product = {
       _id: `demo${String(db.nextProductId++).padStart(4, "0")}`,
       ...v.value,
-      emoji: "🛍️",
       sellersName: auth.username,
       sellersEmail: auth.email,
       createdAt: now,
