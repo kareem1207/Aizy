@@ -65,29 +65,29 @@ def initialize_ai_models():
         os.makedirs("plots", exist_ok=True)
         os.makedirs("models", exist_ok=True)
         
-        print("🚀 Initializing AI models...")
+        print("Initializing AI models...")
         
         ai_instance = EcommerceAI()
         
         try:
             ai_instance.train_fashion_assistant("./data/fashion.csv")
-            print("✅ Fashion assistant initialized")
+            print("Fashion assistant initialized")
         except Exception as e:
-            print(f"⚠️ Fashion assistant initialization failed: {e}")
+            print(f"Fashion assistant initialization failed: {e}")
         
         try:
             if os.path.exists("./data/products.csv"):
                 ai_instance.train_sales_forecaster("./data/products.csv")
-                print("✅ Sales forecaster initialized")
+                print("Sales forecaster initialized")
             else:
-                print("ℹ️ No products.csv found, sales forecaster will be trained on first request")
+                print("ℹNo products.csv found, sales forecaster will be trained on first request")
         except Exception as e:
-            print(f"⚠️ Sales forecaster initialization failed: {e}")
+            print(f"Sales forecaster initialization failed: {e}")
             
-        print("✅ AI models initialized successfully")
+        print("AI models initialized successfully")
         return True
     except Exception as e:
-        print(f"❌ Error during AI initialization: {e}")
+        print(f"Error during AI initialization: {e}")
         return False
 
 @app.on_event("startup")
@@ -100,9 +100,9 @@ async def startup_event():
         if os.path.exists("plots") and not hasattr(app, '_plots_mounted'):
             app.mount("/plots", StaticFiles(directory="plots"), name="plots")
             app._plots_mounted = True
-            print("📁 Static plots directory mounted at /plots")
+            print("Static plots directory mounted at /plots")
     except Exception as e:
-        print(f"⚠️ Startup error: {e}")
+        print(f"Startup error: {e}")
 
 @app.get("/")
 def read_root():
@@ -158,14 +158,14 @@ async def get_sales_forecast():
     """Get sales forecasting results"""
     global ai_instance
     try:
-        print("📊 Starting sales forecast generation...")
+        print("Starting sales forecast generation...")
         
         if ai_instance is None:
-            print("🔄 AI instance not found, initializing...")
+            print("AI instance not found, initializing...")
             ai_instance = EcommerceAI()
             
         result = ai_instance.sales_forecaster()
-        print("✅ Sales forecast completed successfully")
+        print("Sales forecast completed successfully")
         
 
         if result:
@@ -177,7 +177,7 @@ async def get_sales_forecast():
                 "comprehensive_analysis": f"{plot_base_url}/comprehensive_seller_analysis.png",
                 "detailed_analysis": f"{plot_base_url}/{safe_product_name}_detailed_analysis.png"
             }
-            print(f"📈 Added plot URLs to response")
+            print(f"Added plot URLs to response")
         
         return AIResponse(
             success=True,
@@ -185,7 +185,7 @@ async def get_sales_forecast():
             data={"forecast": result}
         )
     except Exception as e:
-        print(f"❌ Error in get_sales_forecast: {str(e)}")
+        print(f"Error in get_sales_forecast: {str(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error getting sales forecast: {str(e)}")

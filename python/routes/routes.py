@@ -26,26 +26,26 @@ async def home(request: Request):
         </style>
     </head>
     <body>
-        <h1>🚀 Ecommerce AI API Services</h1>
+        <h1>Ecommerce AI API Services</h1>
         
         <div class="service">
-            <h2>👗 Fashion Assistant</h2>
+            <h2>Fashion Assistant</h2>
             <div class="endpoint">POST /ai/fashion/query - Get fashion recommendations</div>
             <div class="endpoint">POST /ai/fashion/train - Train fashion model</div>
         </div>
         
         <div class="service">
-            <h2>📊 Sales Forecasting</h2>
+            <h2>Sales Forecasting</h2>
             <div class="endpoint">POST /ai/sales/forecast - Get sales predictions</div>
             <div class="endpoint">POST /ai/sales/train - Train forecasting model</div>
         </div>
         
         <div class="service">
-            <h2>🛡️ Admin AI</h2>
+            <h2>Admin AI</h2>
             <div class="endpoint">POST /ai/admin/train - Train admin model</div>
         </div>
         
-        <p><a href="/docs">📖 View Interactive API Documentation</a></p>
+        <p><a href="/docs">View Interactive API Documentation</a></p>
     </body>
     </html>
     """
