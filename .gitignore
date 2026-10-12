@@ -5,3 +5,7 @@ dist/
 aizy_ai
 __pycache__/
 model_test/ 
+
+# Python
+python/.venv/
+python/models/*.joblib

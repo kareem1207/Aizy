@@ -32,7 +32,7 @@ class Dummy_Dataset:
         
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         pd.DataFrame(dummy_data).to_csv(filepath, index=False)
-        print(f"✅ Dummy fashion data created at '{filepath}'")
+        print(f"Dummy fashion data created at '{filepath}'")
 
     def _create_dummy_sales_data(self, filepath):
         products = [
@@ -64,4 +64,4 @@ class Dummy_Dataset:
         
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         pd.DataFrame(dummy_data).to_csv(filepath, index=False)
-        print(f"✅ Dummy sales data created at '{filepath}'")
+        print(f"Dummy sales data created at '{filepath}'")

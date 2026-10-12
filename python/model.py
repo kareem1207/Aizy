@@ -4,10 +4,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend to avoid threading issues
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier
 from statsmodels.tsa.arima.model import ARIMA
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.pipeline import Pipeline
 import os
 import warnings
 from typing import cast
@@ -24,7 +21,7 @@ class Models:
         try:
             data = pd.read_csv(filepath)
             if data.empty:
-                print(f"❌ Fashion data file '{filepath}' is empty.")
+                print(f"Fashion data file '{filepath}' is empty.")
                 return None
             for col in ['category', 'gender', 'region', 'occasion']:
                 if col in data.columns:
@@ -39,23 +36,20 @@ class Models:
             y = data['product_name'] if 'product_name' in data.columns else data.iloc[:, -1]
             
             if X.empty or y.empty:
-                print(f"❌ No features or target found after processing '{filepath}'.")
+                print(f"No features or target found after processing '{filepath}'.")
                 return None
-            model_pipeline = Pipeline([
-                        ('count', TfidfVectorizer(stop_words='english', max_features=1000)),
-                        ('clf', RandomForestClassifier(random_state=42, n_estimators=100))
-            ])
+            from fashion_recommender import FashionRecommender
+            model_pipeline = FashionRecommender().fit(X, y, data['gender'])
 
-            model_pipeline.fit(X, y)
-            print("✅ Fashion Model Created and Trained Successfully.")
-            joblib.dump(model_pipeline, "models/fashion_assistant_model_created.pkl")
-            print("✅ Fashion Model saved to models/fashion_assistant_model_created.pkl")
+            print("Fashion Model Created and Trained Successfully.")
+            joblib.dump(model_pipeline, "models/fashion_recommender.joblib")
+            print("Fashion Model saved to models/fashion_recommender.joblib")
             return model_pipeline
         except Exception as e:
             if e is FileNotFoundError:
-                print(f"❌ Fashion data file not found at '{filepath}' will suggest to use the dummy_dataset.py code to generate few fake dataset.")
+                print(f"Fashion data file not found at '{filepath}' will suggest to use the dummy_dataset.py code to generate few fake dataset.")
                 return self.create_fashion_model(filepath)
-            print(f"❌ Error creating fashion model: {e}")
+            print(f"Error creating fashion model: {e}")
             return None
     
     def create_sales_data_preprocessor(self, filepath:str="products.csv"):
@@ -63,7 +57,7 @@ class Models:
         try: 
             sales_data = pd.read_csv(filepath)
             if sales_data.empty:
-                print("❌ Sales data file is empty. Use the dummy_dataset.py code to generate a few fake datasets.")
+                print("Sales data file is empty. Use the dummy_dataset.py code to generate a few fake datasets.")
                 return None, None
             date_col = next((col for col in sales_data.columns if 'date' in col.lower()), None)
             product_col = next((col for col in sales_data.columns if 'product' in col.lower() and 'name' in col.lower()), None)
@@ -71,7 +65,7 @@ class Models:
             profit_col = next((col for col in sales_data.columns if col.lower() in ['profit', 'margin']), None)
 
             if not all([date_col, product_col, sales_col]):
-                print(f"❌ Required columns missing. Found: {list(sales_data.columns)}")
+                print(f"Required columns missing. Found: {list(sales_data.columns)}")
                 return None, None
 
             sales_data[date_col] = pd.to_datetime(sales_data[date_col], errors='coerce')
@@ -80,7 +74,7 @@ class Models:
             if profit_col is None:
                 profit_col = 'Profit'
                 sales_data[profit_col] = sales_data[sales_col] * 0.2
-                print("⚠️ No profit column found. Using 20% of sales as profit.")
+                print("No profit column found. Using 20% of sales as profit.")
                 
             monthly_data = sales_data.groupby([
                 sales_data[date_col].dt.to_period("M"), product_col
@@ -92,15 +86,21 @@ class Models:
             
             sales_pivot.index = cast(pd.PeriodIndex, sales_pivot.index).to_timestamp()
             profit_pivot.index = cast(pd.PeriodIndex, profit_pivot.index).to_timestamp()
+
+            # statsmodels needs an index with an explicit frequency; the pivot drops it,
+            # and months without sales must exist as zeros rather than be missing.
+            full_range = pd.date_range(sales_pivot.index.min(), sales_pivot.index.max(), freq="MS")
+            sales_pivot = sales_pivot.reindex(full_range, fill_value=0)
+            profit_pivot = profit_pivot.reindex(full_range, fill_value=0)
             
-            print("✅ Sales Data Prepared Successfully!")
+            print("Sales Data Prepared Successfully!")
             return sales_pivot, profit_pivot
             
         except FileNotFoundError:
-            print(f"❌ Sales data file not found at '{filepath}'.")
+            print(f"Sales data file not found at '{filepath}'.")
             return None, None
         except Exception as e:
-            print(f"❌ Error processing sales data: {e}")
+            print(f"Error processing sales data: {e}")
             return None, None
     
     def _calculate_trend(self, series):
@@ -118,7 +118,7 @@ class Models:
                 return None
             sales_data, profit_data = result
             if sales_data.empty or profit_data.empty:  
-                print("❌ No data available for forecasting")
+                print("No data available for forecasting")
                 return None
             forecasts = {
                 'sales_forecasts': {},
@@ -158,11 +158,11 @@ class Models:
                     }
                     
                 except Exception as e:
-                    print(f"⚠️ Skipping forecast for {product}: {str(e)[:100]}")
+                    print(f"Skipping forecast for {product}: {str(e)[:100]}")
                     continue
 
             if not forecasts['sales_forecasts']:
-                print("📉 No products available for forecasting.")
+                print("No products available for forecasting.")
                 return None
 
             sales_f = forecasts['sales_forecasts']
@@ -193,15 +193,15 @@ class Models:
                 'profit_data': profit_data
             }
             joblib.dump(forecasting_results, "models/sales_forecasting_model.pkl")
-            print("✅ Sales Forecasting Model created and saved")
+            print("Sales Forecasting Model created and saved")
             return forecasting_results
         except Exception as e:
-            print(f"❌ Error creating forecasting model: {e}")
+            print(f"Error creating forecasting model: {e}")
             return None
         
     def create_forecast_visualizations(self, forecasting_results):
         if not forecasting_results:
-            print("❌ No forecasting results available for visualization.")
+            print("No forecasting results available for visualization.")
             return False
             
         try:
@@ -299,7 +299,7 @@ class Models:
             plt.tight_layout()
             
             plt.savefig('plots/comprehensive_seller_analysis.png', dpi=300, bbox_inches='tight')
-            print(f"✅ Comprehensive analysis plot saved as 'plots/comprehensive_seller_analysis.png'")
+            print(f"Comprehensive analysis plot saved as 'plots/comprehensive_seller_analysis.png'")
             
             self._plot_individual_forecast(best_product, forecasting_results['sales_data'], forecasting_results['profit_data'])
             
@@ -307,7 +307,7 @@ class Models:
             return True
             
         except Exception as e:
-            print(f"❌ Error creating forecast visualizations: {e}")
+            print(f"Error creating forecast visualizations: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -337,5 +337,5 @@ class Models:
         plt.tight_layout()
         safe_filename = product_name.replace(' ', '_').replace('/', '_')
         plt.savefig(f'plots/{safe_filename}_detailed_analysis.png', dpi=300, bbox_inches='tight')
-        print(f"✅ Detailed analysis for {product_name} saved as 'plots/{safe_filename}_detailed_analysis.png'")
+        print(f"Detailed analysis for {product_name} saved as 'plots/{safe_filename}_detailed_analysis.png'")
         plt.close('all')  # Close all figures
